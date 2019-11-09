@@ -4,7 +4,7 @@ tensorflow==2.0
 numpy==1.16.5
 scipy==1.2.2
 h5py==2.8.0
-pillow==5.3.0
+pillow==6.2.0
 dlib
 keras==2.2.4
 opencv-python
