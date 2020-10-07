@@ -11,9 +11,11 @@ keras==2.2.4
 scikit-image
 thriftpy2
 selenium==3.141.0
-pandas
+pandas==0.24.2
 #yahoo-finance
 yfinance
 lxml
 pyserial
 reportlab
+requests
+pip
