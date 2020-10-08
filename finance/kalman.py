@@ -5,6 +5,16 @@ from finance.alphavantage.sync import read_json
 NSAMPLES = 100
 NDIM = 4
 
+
+def state_transition_matrix(n_dim_y, n_dim_x):
+    if n_dim_y == 1:
+        return np.array([[1.0 / np.math.factorial(index) for index in range(0, n_dim_x)]])
+
+    else:
+        matrix = state_transition_matrix(n_dim_y-1, n_dim_x)
+        return np.vstack([matrix, np.hstack([np.array([0]), matrix[-1][:-1]])])
+
+
 def read_data(samples=10, derivations=3, symbol='AAPL', field='4. close'):
 
     def append_derivatives(matrix, remaining_derivatives):
@@ -23,8 +33,11 @@ def read_data(samples=10, derivations=3, symbol='AAPL', field='4. close'):
 
 measurements = read_data(samples=NSAMPLES, derivations=NDIM-1)
 
-kf = KalmanFilter(n_dim_obs=NDIM, n_dim_state=NDIM)
-results = kf.em(measurements, n_iter=20).smooth(measurements)[0]
+kf_smoothing = KalmanFilter(n_dim_obs=NDIM, n_dim_state=NDIM)
+results_smoothed = kf_smoothing.em(measurements, n_iter=20).smooth(measurements)[0]
 
 #means, covariances = kf.filter(measurements)
+pass
+
+F=state_transition_matrix(5, 5)
 pass
