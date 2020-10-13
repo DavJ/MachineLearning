@@ -4,9 +4,10 @@ from finance.alphavantage.sync import read_json
 from datetime import datetime, timedelta
 
 NSAMPLES = 120
-NDIM = 30
+NDIM = 3
 SYMBOL = 'AAPL'
-DAYS_BACK_HISTORY = 25
+#SYMBOL = 'BA'
+DAYS_BACK_HISTORY = 1
 
 
 def state_transition_matrix(n_dim_y, n_dim_x):
@@ -28,7 +29,8 @@ def read_data(samples=10, offset=0, derivations=3, symbol='AAPL', field='4. clos
 
     response = read_json(symbol)
 
-    sorted_keys = reversed(list(response.keys())[offset : samples + offset]) #TODO implement sorting, don't rely that data are always sorted
+    sorted_keys = sorted([k for k in response.keys()],
+                         key=lambda x: datetime.fromisoformat(x))[-NSAMPLES-offset: -offset]
 
     all_data = {key: response[key][field] for key in response.keys()}
     data_1d = np.array([[all_data[key] for key in sorted_keys]], dtype=float)
