@@ -4,7 +4,7 @@ from alphavantage import data_json
 from datetime import datetime
 
 NSAMPLES = 365
-NDIM = 10
+NDIM = 100
 
 DAYS_BACK_HISTORY = 1
 
