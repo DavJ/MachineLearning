@@ -53,19 +53,19 @@ def store_data():
 
                 try:
                     data = json.loads(response)['Time Series (Daily)']
-                    if today() in data:
-                        close_price = data[today()]['4. close']
-                        stock = dict(date=today(), future_date=today(), symbol=symbol, price=close_price,
-                                     future_price_predict=None, future_price=close_price, json_data=response)
-                        await insert_stock(**stock)
+                    #if today() in data:
+                    #close_price = data[today()]['4. close']
+                    close_price = data['2020-11-13']['4. close']
+                    stock = dict(date=today(), future_date=today(), symbol=symbol, price=close_price,
+                                 future_price_predict=None, future_price=close_price, json_data=response)
+                    await insert_stock(**stock)
                 except:
-                    logger.warning(f'cannot parse or store response for symbol {symbol}: {response}')
+                    logger.warning(f'cannot parse or store response for symbol {symbol}')
 
     loop = asyncio.get_event_loop()
     tasks = [loop.create_task(get_data(symbol)) for symbol in SYMBOLS]
     loop.run_until_complete(asyncio.wait(tasks))
     loop.close()
-
 
 if __name__ == '__main__':
     # data_json('ROKU')
