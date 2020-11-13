@@ -2,11 +2,7 @@ from pykalman import KalmanFilter
 import numpy as np
 from alphavantage import data_json
 from datetime import datetime
-
-NSAMPLES = 365
-NDIM = 100
-
-DAYS_BACK_HISTORY = 1
+from config import NSAMPLES, NDIM, DAYS_BACK_HISTORY
 
 def state_transition_matrix(n_dim_y, n_dim_x):
     if n_dim_y == 1:
@@ -15,6 +11,8 @@ def state_transition_matrix(n_dim_y, n_dim_x):
     else:
         matrix = state_transition_matrix(n_dim_y-1, n_dim_x)
         return np.vstack([matrix, np.hstack([np.array([0]), matrix[-1][:-1]])])
+
+STATE_TRANSITION_MATRIX = state_transition_matrix(NDIM, NDIM)
 
 def read_data(samples=10, offset=0, derivations=3, symbol='AAPL', field='4. close'):
 
@@ -31,13 +29,13 @@ def read_data(samples=10, offset=0, derivations=3, symbol='AAPL', field='4. clos
          sorted_keys = sorted([k for k in response.keys()],
                          key=lambda x: datetime.fromisoformat(x))[-NSAMPLES::]
     else:
-        sorted_keys = sorted([k for k in response.keys()],
+         sorted_keys = sorted([k for k in response.keys()],
                              key=lambda x: datetime.fromisoformat(x))[-NSAMPLES-offset:-offset]
 
     all_data = {key: response[key][field] for key in response.keys()}
     data_1d = np.array([[all_data[key] for key in sorted_keys]], dtype=float)
     print(f'latest date in downloaded data for symbol {symbol}: {list(response.keys())[0]}')
-    last_date=datetime.fromisoformat(list(response.keys())[offset])
+    last_date = datetime.fromisoformat(list(response.keys())[offset])
     return last_date, all_data, append_derivatives(data_1d, derivations).transpose()
 
 def predict_means(last_state, kalman_filtr, number_of_days=1):
@@ -48,7 +46,7 @@ def predict_means(last_state, kalman_filtr, number_of_days=1):
         return np.power(displacement_vector, powers).transpose()
 
     n_dim = len(last_state)
-    tp_generating_matrix = state_transition_matrix(n_dim, n_dim)
+    tp_generating_matrix = STATE_TRANSITION_MATRIX
     partial_differences = np.multiply(last_state, displacement_power_vector(n_dim, number_of_days))
     predicted_state = tp_generating_matrix.dot(partial_differences)
 
@@ -57,10 +55,9 @@ def predict_means(last_state, kalman_filtr, number_of_days=1):
 def predict_stock_price(symbol, days_delta):
     last_date, all_prices, measurements = read_data(samples=NSAMPLES, offset=DAYS_BACK_HISTORY,
                                                     derivations=NDIM-1, symbol=symbol)
-    F = state_transition_matrix(NDIM, NDIM)
     kf_designed = KalmanFilter(n_dim_obs=NDIM,
                                n_dim_state=NDIM,
-                               transition_matrices=F).em(measurements, n_iter=20)
+                               transition_matrices=STATE_TRANSITION_MATRIX).em(measurements, n_iter=20)
 
     (filtered_state_means, filtered_state_covariances) = kf_designed.filter(measurements)
     predicted_price = predict_means(last_state=filtered_state_means[-1],

@@ -1,6 +1,7 @@
 import requests
 import json
 import config
+from datetime import datetime
 
 def data_json(symbol):
   payload = {
@@ -19,5 +20,17 @@ def data_json(symbol):
 def data_json_dumps(symbol):
   return json.dumps(data_json(symbol))
 
+
+def today_data(symbol):
+  data = data_json(symbol)
+  if datetime.now().date().isoformat() in data:
+    return data
+
+
+def
+
+
 if __name__ == '__main__':
   data_json('ROKU')
+
+
