@@ -3,7 +3,7 @@ from datetime import date, datetime
 import tensorflow as tf
 import ephem
 import numpy as np
-from sportka.download import download_data_from_sazka
+from download import download_data_from_sazka
 import random
 
 REALIZATIONS = 10
