@@ -15,7 +15,7 @@ def download_data_from_sazka(directory='./downloads'):
     driver.get('https://www.sazka.cz/loterie/sportka/statistiky')
     try:
         element = WebDriverWait(driver, 10).until(
-           EC.element_to_be_clickable((By.ID, "p_lt_ctl08_wPL_p_lt_ctl04_wP_p_lt_ctl01_wS_csvHistory_btnGetCSV"))
+           EC.element_to_be_clickable((By.XPATH, '//*[@value="Kompletní historie tažených čísel"]'))
         )
         driver.get_screenshot_as_file('sazka.png')
         element.click()
