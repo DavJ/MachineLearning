@@ -161,7 +161,7 @@ def learn_and_predict_sportka(x_train, y_train, x_predict, depth=256, epochs=15)
     model = tf.keras.Model(inputs=inputs, outputs=predictions)
 
     # The compile step specifies the training configuration.
-    model.compile(optimizer=tf.train.AdamOptimizer(0.0005), loss='mse')
+    model.compile(optimizer='adam', loss='mse')
 
     model.fit(x=x_train, y=y_train, epochs=epochs)
     return model.predict(x_predict)
@@ -170,7 +170,7 @@ def learn_and_predict_sportka(x_train, y_train, x_predict, depth=256, epochs=15)
 ############################## main program ############################################################################
 ########################################################################################################################
 
-DATE_PREDICT = '4.8.2019'
+DATE_PREDICT = '16.11.2020'
 
 dh = draw_history()
 print(dh)

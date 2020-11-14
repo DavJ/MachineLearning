@@ -191,8 +191,7 @@ def recommended_numbers_for_ticket(choose_from_best=12):
 ########################################################################################################################
 ############################## main program ############################################################################
 ########################################################################################################################
-
-DATE_PREDICT = '24.11.2019'
+DATE_PREDICT = '16.11.2020'
 
 
 dh = draw_history()
@@ -211,9 +210,9 @@ x_train_all = np.array([np.concatenate((draw.x_train, draw.x_train_history_1, dr
 y_train_1 = np.array([draw.y_train_1 for draw in dh.draws for realization in REALIZATIONS])
 y_train_2 = np.array([draw.y_train_2 for draw in dh.draws for realization in REALIZATIONS])
 
-y_predict_1 = learn_and_predict_sportka(x_train_all, y_train_1, x_predict_all, depth=128, epochs=150)
+y_predict_1 = learn_and_predict_sportka(x_train_all, y_train_1, x_predict_all, depth=128, epochs=500)
 y_predict_numbers_1 = y_predict_1[:49]
-y_predict_2 = learn_and_predict_sportka(x_train_all, y_train_2, x_predict_all, depth=128, epochs=150)
+y_predict_2 = learn_and_predict_sportka(x_train_all, y_train_2, x_predict_all, depth=128, epochs=500)
 y_predict_numbers_2 = y_predict_2[:49]
 
 print('first draw ')
@@ -231,7 +230,3 @@ print('all numbers\n: {}\n\n'.format(best_numbers(y_predict_numbers_1 + y_predic
 print('recommended numbers : \n:')
 for recommended_column in recommended_numbers_for_ticket():
     print(recommended_column)
-
-
-
-
