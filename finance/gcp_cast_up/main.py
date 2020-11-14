@@ -16,7 +16,7 @@
 from flask import Flask, request
 from markupsafe import escape
 from kalman import predict_stock_price
-from alphavantage import data_json_dumps
+from alphavantage import data_json_dumps, store_data
 
 # If `entrypoint` is not defined in app.yaml, App Engine will look for an app
 # called `app` in `main.py`.
@@ -40,6 +40,11 @@ def predict():
 def data():
     symbol = request.args.get('symbol', default='AAPL', type=str)
     return data_json_dumps(symbol)
+
+@app.route("/store-data/")
+def store():
+    return store_data()
+
 
 if __name__ == '__main__':
     # This is used when running locally only. When deploying to Google App

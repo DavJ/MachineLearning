@@ -4,7 +4,7 @@ from config import ALPHA_API_KEY, SYMBOLS, DB_FILE
 from datetime import datetime
 import aiohttp
 import asyncio
-from aiodbclient import insert_stock
+from aiodbclient import aio_insert_stock, get_count_of_stock_records
 from logging import getLogger
 
 logger = getLogger('alphavantage')
@@ -19,7 +19,7 @@ def data_json(symbol):
     'datatype': 'json'
   }
 
-  r = requests.get('https://www.alphavantage.co/query?', params=PAYLOAD)
+  r = requests.get('https://www.alphavantage.co/query?', params=payload)
   data = json.loads(r.text)['Time Series (Daily)']
 
   return data
@@ -58,15 +58,22 @@ def store_data():
                     close_price = data['2020-11-13']['4. close']
                     stock = dict(date=today(), future_date=today(), symbol=symbol, price=close_price,
                                  future_price_predict=None, future_price=close_price, json_data=response)
-                    await insert_stock(**stock)
+                    await aio_insert_stock(**stock)
                 except:
                     logger.warning(f'cannot parse or store response for symbol {symbol}')
+
+    original_stock_records = get_count_of_stock_records()
 
     loop = asyncio.get_event_loop()
     tasks = [loop.create_task(get_data(symbol)) for symbol in SYMBOLS]
     loop.run_until_complete(asyncio.wait(tasks))
     loop.close()
 
+    final_stock_records = get_count_of_stock_records()
+
+    return f'added {final_stock_records - original_stock_records} stock price records'
+
+
 if __name__ == '__main__':
     # data_json('ROKU')
-    store_data()
+    print(store_data())
