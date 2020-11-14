@@ -7,6 +7,8 @@ from download import download_data_from_sazka
 import random
 
 REALIZATIONS = 10
+LEARNING_EPOCHS = 600
+DEPTH = 256
 
 class sazka_building(ephem.Observer):
 
@@ -23,7 +25,7 @@ class draw_history(object):
 
     def __init__(self):
         download_data_from_sazka()
-        with open('/tmp/sportka.csv', newline='') as csvfile:
+        with open('./downloads/sportka.csv', newline='') as csvfile:
             the_reader = csv.reader(csvfile, delimiter=';')
             is_header = True
             for row in the_reader:
@@ -120,7 +122,7 @@ def date_to_x(date):
     next_new_moon = ephem.next_new_moon(date)
     relative_lunation = (ephem.Date(date) - previous_new_moon) / (next_new_moon - previous_new_moon)
 
-    return np.array([date.day / 31.0, date.month / 12.0, date.year / 2019.0, date.weekday() / 6.0, relative_lunation])
+    return np.array([date.day / 31.0, date.month / 12.0, date.year / 2020.0, date.weekday() / 6.0, relative_lunation])
 
 
 def learn_and_predict_sportka(x_train, y_train_both, x_predict, depth=128, depth_wide=32, epochs=15):
@@ -210,9 +212,9 @@ x_train_all = np.array([np.concatenate((draw.x_train, draw.x_train_history_1, dr
 y_train_1 = np.array([draw.y_train_1 for draw in dh.draws for realization in REALIZATIONS])
 y_train_2 = np.array([draw.y_train_2 for draw in dh.draws for realization in REALIZATIONS])
 
-y_predict_1 = learn_and_predict_sportka(x_train_all, y_train_1, x_predict_all, depth=128, epochs=500)
+y_predict_1 = learn_and_predict_sportka(x_train_all, y_train_1, x_predict_all, depth=DEPTH, epochs=LEARNING_EPOCHS)
 y_predict_numbers_1 = y_predict_1[:49]
-y_predict_2 = learn_and_predict_sportka(x_train_all, y_train_2, x_predict_all, depth=128, epochs=500)
+y_predict_2 = learn_and_predict_sportka(x_train_all, y_train_2, x_predict_all, depth=DEPTH, epochs=LEARNING_EPOCHS)
 y_predict_numbers_2 = y_predict_2[:49]
 
 print('first draw ')
