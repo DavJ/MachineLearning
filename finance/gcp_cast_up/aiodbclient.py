@@ -53,7 +53,11 @@ def get_count_of_stock_records():
 def get_data_for_date_and_symbol(date, symbol):
     with sqlite3.connect(DB_FILE) as conn:
         cursor = conn.cursor()
-        cursor.execute('''SELECT json_data FROM stocks WHERE date=future_date AND date=? AND symbol=?;''',
+        cursor.execute('''SELECT json_data
+                          FROM stocks
+                          WHERE date=?
+                          AND symbol=?
+                          ORDER BY future_date;''',
                        (date, symbol))
         try:
             return json.loads(cursor.fetchone()[0])

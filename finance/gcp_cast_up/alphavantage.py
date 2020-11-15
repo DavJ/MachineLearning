@@ -85,11 +85,11 @@ def predict_all_data(date=today()):
             predicted_price = predict_stock_price(symbol, 1, data_json)
             logger.debug(f'predicted price for symbol {symbol}: {predicted_price}')
             update_stock_price_predicted(date=date, future_date=next_business_day(date),
-                                         symbol=symbol, future_price_predict=predict_stock_price)
+                                         symbol=symbol, future_price_predict=predicted_price)
 
 if __name__ == '__main__':
     # data_json('ROKU')
-    print(store_data())
+    print(store_data('2020-11-13'))
     #predict_all_data('2020-11-13')
-    predict_all_data()
+    predict_all_data('2020-11-13')
     pass
