@@ -4,8 +4,11 @@ from config import ALPHA_API_KEY, SYMBOLS, DB_FILE
 from datetime import datetime
 import aiohttp
 import asyncio
-from aiodbclient import aio_insert_stock, get_count_of_stock_records
+from aiodbclient import (aio_insert_stock, get_count_of_stock_records, get_data_for_date_and_symbol,
+                         update_stock_price_predicted)
 from logging import getLogger
+from kalman import predict_stock_price
+from businessdates import next_business_day
 
 logger = getLogger('alphavantage')
 
@@ -27,7 +30,6 @@ def data_json(symbol):
 def data_json_dumps(symbol):
   return json.dumps(data_json(symbol))
 
-
 def today_data(symbol):
   data = data_json(symbol)
   if today() in data:
@@ -36,7 +38,7 @@ def today_data(symbol):
 def today():
     return datetime.now().date().isoformat()
 
-def store_data():
+def store_data(date=today()):
 
     async def get_data(symbol):
         async with aiohttp.ClientSession() as session:
@@ -53,12 +55,13 @@ def store_data():
 
                 try:
                     data = json.loads(response)['Time Series (Daily)']
-                    #if today() in data:
-                    #close_price = data[today()]['4. close']
-                    close_price = data['2020-11-13']['4. close']
-                    stock = dict(date=today(), future_date=today(), symbol=symbol, price=close_price,
-                                 future_price_predict=None, future_price=close_price, json_data=response)
-                    await aio_insert_stock(**stock)
+                    if date in data:
+                       close_price = data[date]['4. close']
+                       stock = dict(date=date, future_date=next_business_day(date), symbol=symbol, price=close_price,
+                                future_price_predict=None, future_price=close_price, json_data=response)
+                       await aio_insert_stock(**stock)
+                    else:
+                       raise Exception('old data')
                 except:
                     logger.warning(f'cannot parse or store response for symbol {symbol}')
 
@@ -73,7 +76,20 @@ def store_data():
 
     return f'added {final_stock_records - original_stock_records} stock price records'
 
+def predict_all_data(date=today()):
+    for symbol in SYMBOLS:
+      for symbol in SYMBOLS:
+        data_json = get_data_for_date_and_symbol(date, symbol)
+        if data_json:
+            logger.debug(f'predict data for symbol {symbol}')
+            predicted_price = predict_stock_price(symbol, 1, data_json)
+            logger.debug(f'predicted price for symbol {symbol}: {predicted_price}')
+            update_stock_price_predicted(date=date, future_date=next_business_day(date),
+                                         symbol=symbol, future_price_predict=predict_stock_price)
 
 if __name__ == '__main__':
     # data_json('ROKU')
     print(store_data())
+    #predict_all_data('2020-11-13')
+    predict_all_data()
+    pass

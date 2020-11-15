@@ -34,7 +34,7 @@ def usage():
 def predict():
   symbol = request.args.get('symbol', default = 'AAPL', type = str)
   days = request.args.get('days', default = 1, type = int)
-  return predict_stock_price(symbol, days)
+  return str(predict_stock_price(symbol, days))
 
 @app.route("/data/")
 def data():
