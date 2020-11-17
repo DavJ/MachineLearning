@@ -1,7 +1,7 @@
 mac: 
 	python3 -m venv p38 --system-site-packages
-	pip install -U pip
-	pip install --upgrade -r requirements.txt
+	pip3 install -U pip
+	pip3 install --upgrade -r requirements.txt
 
 prepare-ubuntu:
 	sudo apt-get install python3-venv
