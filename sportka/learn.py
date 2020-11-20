@@ -188,12 +188,17 @@ def recommended_numbers_for_ticket(choose_from_best=12):
 
     return recommended_numbers
 
-
+def random_predict(weights):
+    while True:
+      choice=random.choices(range(1,50), weights=weights, k=6)
+      if max([choice.count(c) for c in choice]) == 1:
+          break
+    return choice
 
 ########################################################################################################################
 ############################## main program ############################################################################
 ########################################################################################################################
-DATE_PREDICT = '16.11.2020'
+DATE_PREDICT = '22.11.2020'
 
 
 dh = draw_history()
@@ -217,18 +222,8 @@ y_predict_numbers_1 = y_predict_1[:49]
 y_predict_2 = learn_and_predict_sportka(x_train_all, y_train_2, x_predict_all, depth=DEPTH, epochs=LEARNING_EPOCHS)
 y_predict_numbers_2 = y_predict_2[:49]
 
-print('first draw ')
-print('best numbers for {}\n: {}\n\n'.format(DATE_PREDICT, best_numbers(y_predict_numbers_1, 6)))
-print('all numbers\n: {}\n\n'.format(best_numbers(y_predict_numbers_1, 49)))
+probability_distribution_predicted = (y_predict_numbers_1 + y_predict_numbers_2)/(sum(y_predict_numbers_1 + y_predict_numbers_2))
 
-print('second draw {}')
-print('best numbers for {}\n: {}\n\n'.format(DATE_PREDICT, best_numbers(y_predict_numbers_2, 6)))
-print('all numbers\n: {}\n\n'.format(best_numbers(y_predict_numbers_2, 49)))
+for i in range(10):
+    print(random_predict(weights=(y_predict_numbers_1 + y_predict_numbers_2)[0]))
 
-print('combined :')
-print('best numbers for {}\n: {}\n\n'.format(DATE_PREDICT, best_numbers(y_predict_numbers_1 + y_predict_numbers_2, 6)))
-print('all numbers\n: {}\n\n'.format(best_numbers(y_predict_numbers_1 + y_predict_numbers_2, 49)))
-
-print('recommended numbers : \n:')
-for recommended_column in recommended_numbers_for_ticket():
-    print(recommended_column)
