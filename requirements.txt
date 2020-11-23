@@ -26,3 +26,4 @@ asyncio
 aiohttp
 aiosqlite
 #sqlite3
+holidays
