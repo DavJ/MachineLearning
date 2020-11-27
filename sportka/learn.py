@@ -202,7 +202,7 @@ def recommended_numbers_for_ticket(choose_from_best=12):
 
 def random_predict(y_predict):
 
-    weights = (y_predict + 1) / 2
+    weights = (y_predict + 1.5) / 3
     while True:
       choice=random.choices(range(1, 50), weights=weights, k=6)
       if max([choice.count(c) for c in choice]) == 1:
