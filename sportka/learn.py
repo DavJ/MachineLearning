@@ -5,9 +5,11 @@ import ephem
 import numpy as np
 from download import download_data_from_sazka
 import random
+from calendar import monthrange
 
+DATE_PREDICT = '29.11.2020'
 REALIZATIONS = 10
-LEARNING_EPOCHS = 600
+LEARNING_EPOCHS = 1
 DEPTH = 256
 
 class sazka_building(ephem.Observer):
@@ -34,7 +36,6 @@ class draw_history(object):
 
                 is_header = False
 
-
 class draw(object):
 
     def __init__(self, row, draw_history):
@@ -47,7 +48,6 @@ class draw(object):
             self.second = [int(x) for x in row[11:18]]
             self.draw_history = draw_history
             #self.observer = sazka_building(self.date)
-            self.noise = NOISE
 
             print('>OK')
         except:
@@ -63,31 +63,31 @@ class draw(object):
 
     @property
     def y_train_1(self):
-        probability_first = np.array([1.0 if number in self.first else 0 for number in range(1, 50)])
-        return probability_first / 7.0
+        probability_first = np.array([1.0 if number in self.first else -1 for number in range(1, 50)])
+        return probability_first
 
     @property
     def y_train_2(self):
-        probability_second = np.array([1.0 if number in self.second else 0 for number in range(1, 50)])
-        return probability_second / 7.0
+        probability_second = np.array([1.0 if number in self.second else -1 for number in range(1, 50)])
+        return probability_second
 
     @property
     def y_train_pairs_1(self):
         probability_first = np.array([
-            0 if i == j else 1 if (i in self.first and j in self.first) else 0
+            -1 if i == j else 1 if (i in self.first and j in self.first) else -1
             for i in range(1, 50)
             for j in range(1, 50)
         ])
-        return probability_first / 49.0
+        return probability_first
 
     @property
     def y_train_pairs_2(self):
         probability_second = np.array([
-            0 if i == j else 1 if (i in self.second and j in self.second) else 0
+            1 if i == j else 1 if (i in self.second and j in self.second) else -1
             for i in range(1, 50)
             for j in range(1, 50)
         ])
-        return probability_second / 49.0
+        return probability_second
 
     @property
     def x_train_history_1(self):
@@ -98,7 +98,7 @@ class draw(object):
         if history_index >= 0:
             return self.draw_history.draws[history_index].y_train_1 + next(self.noise)
         else:
-            return np.array([1/49.0 for number in range(1, 50)])
+            return np.array([0 for number in range(1, 50)])
 
     @property
     def x_train_history_2(self):
@@ -108,26 +108,39 @@ class draw(object):
         if history_index >= 0:
             return self.draw_history.draws[history_index].y_train_2 + next(self.noise)
         else:
-            return np.array([1/49.0 for number in range(1, 50)])
+            return np.array([0 for number in range(1, 50)])
 
     @property
     def observer(self):
         return sazka_building
 
+def numerology(num_string):
+    num = 0
+    for s in num_string:
+        num += int(s)
+    if num < 10:
+        return num
+    else:
+        return numerology(str(num))
 
 def date_to_x(date):
-
     #consider also some astrological data
     previous_new_moon = ephem.previous_new_moon(date)
     next_new_moon = ephem.next_new_moon(date)
     relative_lunation = (ephem.Date(date) - previous_new_moon) / (next_new_moon - previous_new_moon)
+    numer = numerology(str(date.day) + str(date.month) + str(date.year))
 
-    return np.array([date.day / 31.0, date.month / 12.0, date.year / 2020.0, date.weekday() / 6.0, relative_lunation])
+    return np.array([2*date.day / monthrange(date.year, date.month)[1] - 1,
+                     2*date.month / 12.0 - 1,
+                     date.year / 2020.0,
+                     2* date.weekday() / 6.0 - 1,
+                     2* (numer - 1) / 8 - 1,
+                     2* relative_lunation - 1])
 
 
 def learn_and_predict_sportka(x_train, y_train_both, x_predict, depth=128, depth_wide=32, epochs=15):
 
-    inputs = tf.keras.Input(shape=(103,))  # Returns a placeholder tensor
+    inputs = tf.keras.Input(shape=(104,))  # Returns a placeholder tensor
 
     x = tf.keras.layers.Dense(128, activation='sigmoid',
                               kernel_initializer='random_normal',
@@ -159,7 +172,6 @@ def learn_and_predict_sportka(x_train, y_train_both, x_predict, depth=128, depth
     model.fit(x=x_train, y=y_train_both, epochs=epochs)
     return model.predict(x_predict)
 
-
 def best_numbers(y_predict, n=6):
     numbers_vs_chances = ((i + 1, y_predict[0][i]) for i in range(49))
     sorted_numbers = sorted(numbers_vs_chances, key=lambda x: x[1], reverse=True)
@@ -188,9 +200,11 @@ def recommended_numbers_for_ticket(choose_from_best=12):
 
     return recommended_numbers
 
-def random_predict(weights):
+def random_predict(y_predict):
+
+    weights = (y_predict + 1) / 2
     while True:
-      choice=random.choices(range(1,50), weights=weights, k=6)
+      choice=random.choices(range(1, 50), weights=weights, k=6)
       if max([choice.count(c) for c in choice]) == 1:
           break
     return sorted(choice)
@@ -198,9 +212,6 @@ def random_predict(weights):
 ########################################################################################################################
 ############################## main program ############################################################################
 ########################################################################################################################
-DATE_PREDICT = '25.11.2020'
-
-
 dh = draw_history()
 print(dh)
 REALIZATIONS = range(15)
@@ -209,7 +220,6 @@ x_predict = np.array([date_to_x(datetime.strptime(DATE_PREDICT, '%d.%m.%Y').date
 x_predict_draw_1 = np.array([dh.draws[-1].y_train_1])
 x_predict_draw_2 = np.array([dh.draws[-1].y_train_2])
 x_predict_all = [np.concatenate((x_predict, x_predict_draw_1, x_predict_draw_2), axis=1)]
-
 
 
 x_train_all = np.array([np.concatenate((draw.x_train, draw.x_train_history_1, draw.x_train_history_2), axis=0) for draw in dh.draws for realization in REALIZATIONS])
@@ -225,5 +235,5 @@ y_predict_numbers_2 = y_predict_2[:49]
 probability_distribution_predicted = (y_predict_numbers_1 + y_predict_numbers_2)/(sum(y_predict_numbers_1 + y_predict_numbers_2))
 
 for i in range(10):
-    print(random_predict(weights=(y_predict_numbers_1 + y_predict_numbers_2)[0]))
+    print(random_predict(y_predict=(y_predict_numbers_1 + y_predict_numbers_2)[0]))
 
