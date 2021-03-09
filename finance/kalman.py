@@ -54,7 +54,7 @@ def predict_means(last_state, kalman_filtr, number_of_days=1):
     partial_differences = np.multiply(last_state, displacement_power_vector(n_dim, number_of_days))
     predicted_state = tp_generating_matrix.dot(partial_differences)
 
-    return predicted_state
+    return float(predicted_state)
 
 
 last_date, all_prices, measurements = read_data(samples=NSAMPLES, offset=DAYS_BACK_HISTORY, derivations=NDIM-1, symbol=SYMBOL)
