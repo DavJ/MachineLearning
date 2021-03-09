@@ -30,6 +30,15 @@ async def aio_insert_stock(date=None, future_date=None, symbol=None, price=None,
             await conn.execute(insert_sql, stock)
             await conn.commit()
 
+async def aio_update_stock(date=None, symbol=None, price=None):
+    update_sql = '''
+        UPDATE stocks SET price=? WHERE date=? AND symbol=?;
+        '''
+    async with aiosqlite.connect(DB_FILE) as conn:
+        stock = (price, date, symbol)
+        await conn.execute(update_sql, stock)
+        await conn.commit()
+
 
 def update_stock_price_predicted(date=None, future_date=None, symbol=None, price=None, future_price_predict=None):
     update_sql = '''
