@@ -20,3 +20,5 @@ reportlab
 requests
 pip
 pykalman
+webdriver-manager
+
