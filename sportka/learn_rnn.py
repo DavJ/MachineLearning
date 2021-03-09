@@ -6,8 +6,7 @@ import numpy as np
 from sportka.download import download_data_from_sazka
 import random
 
-REALIZATIONS = 10
-
+#REALIZATIONS = 10
 
 
 class draw_history():
@@ -112,16 +111,20 @@ def date_to_x(date):
     return np.array([date.day / 31.0, date.month / 12.0, date.year / 2019.0, date.weekday() / 6.0, relative_lunation])
 
 
-def learn_and_predict_sportka(x_train, y_train_both, x_predict, depth=128, depth_wide=32, epochs=15):
-    n_windows = 20
+def learn_and_predict_sportka(all_batches, iterations=20):
+    n_windows = 2
     n_input = 49
     n_output = 49
     size_train = 201
     r_neuron=128
 
+    X_batches = all_batches[::-1]
+    y_batches = all_batches[1::]
+    X_predict = all_batches[-1]
+
     ## 1. Construct the tensors
-    X = tf.placeholder(tf.float32, [None, n_windows, n_input])
-    y = tf.placeholder(tf.float32, [None, n_windows, n_output])
+    X = tf.Variable(tf.float32, [None, n_windows, n_input])
+    y = tf.Variable(tf.float32, [None, n_windows, n_output])
 
     ## 2. create the model
     basic_cell = tf.contrib.rnn.BasicRNNCell(num_units=r_neuron, activation=tf.nn.relu)
@@ -140,20 +143,18 @@ def learn_and_predict_sportka(x_train, y_train_both, x_predict, depth=128, depth
 
     ## 4. Train
     init = tf.global_variables_initializer()
-    iteration = 1500
 
     with tf.Session() as sess:
         init.run()
-        for iters in range(iteration):
-            sess.run(training_op, feed_dict={X: X_batches, y: y_batches})
-            if iters % 150 == 0:
-                mse = loss.eval(feed_dict={X: X_batches, y: y_batches})
-                print(iters, "\tMSE:", mse)
+        for iters in range(iterations):
+           sess.run(training_op, feed_dict={X: X_batches, y: y_batches})
+           if iters % 150 == 0:
+               mse = loss.eval(feed_dict={X: X_batches, y: y_batches})
+               print(iters, "\tMSE:", mse)
 
-        y_pred = sess.run(outputs, feed_dict={X: X_test})
+        y_pred = sess.run(outputs, feed_dict={X: X_predict})
 
     return y_pred
-
 
 
 ########################################################################################################################
@@ -161,24 +162,28 @@ def learn_and_predict_sportka(x_train, y_train_both, x_predict, depth=128, depth
 ########################################################################################################################
 DATE_PREDICT = '10.03.2021'
 
-
 dh = draw_history()
 print(dh)
-REALIZATIONS = range(15)
+#REALIZATIONS = range(15)
 
-x_predict = np.array([date_to_x(datetime.strptime(DATE_PREDICT, '%d.%m.%Y').date())])
-x_predict_draw_1 = np.array([dh.draws[-1].y_train_1])
-x_predict_draw_2 = np.array([dh.draws[-1].y_train_2])
-x_predict_all = [np.concatenate((x_predict, x_predict_draw_1, x_predict_draw_2), axis=1)]
+all_batches = [[draw.x_train_history_1, draw.x_train_history_2] for draw in dh.draws]
+y_batches = all_batches[1::]
+
+y_predict = learn_and_predict_sportka(all_batches)
 
 
-x_train_all = np.array([np.concatenate((draw.x_train, draw.x_train_history_1, draw.x_train_history_2), axis=0) for draw in dh.draws for realization in REALIZATIONS])
+#x_predict = np.array([date_to_x(datetime.strptime(DATE_PREDICT, '%d.%m.%Y').date())])
+#x_predict_draw_1 = np.array([dh.draws[-1].y_train_1])
+#x_predict_draw_2 = np.array([dh.draws[-1].y_train_2])
+#x_predict_all = [np.concatenate((x_predict, x_predict_draw_1, x_predict_draw_2), axis=1)]
 
-y_train_1 = np.array([draw.y_train_1 for draw in dh.draws for realization in REALIZATIONS])
-y_train_2 = np.array([draw.y_train_2 for draw in dh.draws for realization in REALIZATIONS])
 
-y_predict_1 = learn_and_predict_sportka(x_train_all, y_train_1, x_predict_all, depth=128, epochs=150)
-y_predict_numbers_1 = y_predict_1[:49]
-y_predict_2 = learn_and_predict_sportka(x_train_all, y_train_2, x_predict_all, depth=128, epochs=150)
-y_predict_numbers_2 = y_predict_2[:49]
+#x_train_all = np.array([np.concatenate((draw.x_train, draw.x_train_history_1, draw.x_train_history_2), axis=0) for draw in dh.draws for realization in REALIZATIONS])
 
+#y_train_1 = np.array([draw.y_train_1 for draw in dh.draws for realization in REALIZATIONS])
+#y_train_2 = np.array([draw.y_train_2 for draw in dh.draws for realization in REALIZATIONS])
+
+#y_predict_1 = learn_and_predict_sportka(x_train_all, y_train_1, x_predict_all, depth=128, epochs=150)
+#y_predict_numbers_1 = y_predict_1[:49]
+#y_predict_2 = learn_and_predict_sportka(x_train_all, y_train_2, x_predict_all, depth=128, epochs=150)
+#y_predict_numbers_2 = y_predict_2[:49]
