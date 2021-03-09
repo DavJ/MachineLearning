@@ -118,13 +118,13 @@ def learn_and_predict_sportka(all_batches, iterations=20):
     size_train = 201
     r_neuron=128
 
-    X_batches = all_batches[::-1]
-    y_batches = all_batches[1::]
+    X_batches = all_batches[:-1]
+    y_batches = all_batches[1:]
     X_predict = all_batches[-1]
 
     ## 1. Construct the tensors
-    X = tf.Variable(tf.float32, [None, n_windows, n_input])
-    y = tf.Variable(tf.float32, [None, n_windows, n_output])
+    X = tf.Variable(shape=[tf.cell.zero_state(), n_windows, n_input], dtype=tf.float32)
+    y = tf.Variable(shape=[tf.cell.zero_state(), n_windows, n_output], dtype=tf.float32)
 
     ## 2. create the model
     basic_cell = tf.contrib.rnn.BasicRNNCell(num_units=r_neuron, activation=tf.nn.relu)
@@ -170,20 +170,3 @@ all_batches = [[draw.x_train_history_1, draw.x_train_history_2] for draw in dh.d
 y_batches = all_batches[1::]
 
 y_predict = learn_and_predict_sportka(all_batches)
-
-
-#x_predict = np.array([date_to_x(datetime.strptime(DATE_PREDICT, '%d.%m.%Y').date())])
-#x_predict_draw_1 = np.array([dh.draws[-1].y_train_1])
-#x_predict_draw_2 = np.array([dh.draws[-1].y_train_2])
-#x_predict_all = [np.concatenate((x_predict, x_predict_draw_1, x_predict_draw_2), axis=1)]
-
-
-#x_train_all = np.array([np.concatenate((draw.x_train, draw.x_train_history_1, draw.x_train_history_2), axis=0) for draw in dh.draws for realization in REALIZATIONS])
-
-#y_train_1 = np.array([draw.y_train_1 for draw in dh.draws for realization in REALIZATIONS])
-#y_train_2 = np.array([draw.y_train_2 for draw in dh.draws for realization in REALIZATIONS])
-
-#y_predict_1 = learn_and_predict_sportka(x_train_all, y_train_1, x_predict_all, depth=128, epochs=150)
-#y_predict_numbers_1 = y_predict_1[:49]
-#y_predict_2 = learn_and_predict_sportka(x_train_all, y_train_2, x_predict_all, depth=128, epochs=150)
-#y_predict_numbers_2 = y_predict_2[:49]
