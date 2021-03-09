@@ -1,10 +1,14 @@
 import csv
 from datetime import date, datetime
-import tensorflow as tf
+
 import ephem
 import numpy as np
 from sportka.download import download_data_from_sazka
 import random
+import numpy as np
+import tensorflow as tf
+from tensorflow import keras
+from tensorflow.keras import layers
 
 #REALIZATIONS = 10
 
@@ -156,6 +160,50 @@ def learn_and_predict_sportka(all_batches, iterations=20):
 
     return y_pred
 
+def learn_and_predict_keras(all_batches, iterations=20):
+    batch_size = 2
+    size_train=len(all_batches) - 1
+    test_size = 10
+    n_input = 49
+    n_output = 49
+    size_train = l
+    r_neuron=128
+
+    x_train = all_batches[:-1]
+    y_train = all_batches[1:]
+
+    validation_indexes = [random.choice(range(size_train)) for _ in range(10)]
+    x_test = [x_train[i] for i in validation_indexes]
+    y_test = [y_train[i] for i in validation_indexes]
+
+    model = keras.Sequential()
+    model.add(layers.Embedding(input_dim=n_input, output_dim=20, statefull=True))
+
+    # The output of GRU will be a 3D tensor of shape (batch_size, timesteps, 256)
+    model.add(layers.GRU(256, return_sequences=True, statefull=True))
+
+    # The output of SimpleRNN will be a 2D tensor of shape (batch_size, 128)
+    model.add(layers.SimpleRNN(128, statefull=True))
+
+    model.add(layers.Dense(10, statefull=True))
+
+    model.summary()
+
+    #model = build_model(allow_cudnn_kernel=True)
+
+    model.compile(
+        loss=keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+        optimizer="sgd",
+        metrics=["accuracy"],
+    )
+
+    model.fit(
+        x_train, y_train, validation_data=(x_test, y_test), batch_size=batch_size, epochs=1
+    )
+
+
+
+    return model
 
 ########################################################################################################################
 ############################## main program ############################################################################
@@ -164,9 +212,11 @@ DATE_PREDICT = '10.03.2021'
 
 dh = draw_history()
 print(dh)
-#REALIZATIONS = range(15)
 
 all_batches = [[draw.x_train_history_1, draw.x_train_history_2] for draw in dh.draws]
-y_batches = all_batches[1::]
 
-y_predict = learn_and_predict_sportka(all_batches)
+
+rnn_model = learn_and_predict_keras(all_batches)
+predicted = rnn_model.predict(all_batches[-1])
+
+print(predicted)
