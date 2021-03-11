@@ -136,18 +136,22 @@ def learn_and_predict_keras(all_batches, iterations=20):
     return model
 
 
-def best_numbers(y_predict, n=6):
+def numbers_vs_chances(y_predict, n=49):
     norm = sum([y_predict[0][i] for i in range(98)])
     numbers_vs_chances = ((i + 1, 0.5*(y_predict[0][i] + y_predict[0][i+49])/norm) for i in range(49))
     sorted_numbers = sorted(numbers_vs_chances, key=lambda x: x[1], reverse=True)
     return [key for key in sorted_numbers[0:n]]
 
+def best_numbers(numbers_vs_chances):
+    return [n[0] for n in sorted(numbers_vs_chances, key=lambda x: x[1], reverse=True)[:6]]
+
 def random_predict(numbers_vs_chances):
     weights = [w[1] for w in sorted(numbers_vs_chances, key=lambda x: x[0], reverse=False)]
+    proper_weights = (weights - min(weights)) / max(weights - min(weights))
     while True:
-      choice=random.choices(range(1, 50), weights=weights, k=6)
+      choice=random.choices(range(1, 50), weights=proper_weights, k=6)
       if max([choice.count(c) for c in choice]) == 1:
-          break
+        break
     return sorted(choice)
 
 ########################################################################################################################
@@ -164,8 +168,22 @@ rnn_model = learn_and_predict_keras(all_batches)
 predicted = rnn_model.predict(all_batches[-1])
 
 print(predicted)
-numbers_by_chances=best_numbers(y_predict=predicted)
+numbers_by_chances = numbers_vs_chances(y_predict=predicted)
+
+
+print(numbers_by_chances)
+
+print('\n\n\nRECOMMENDED NUMBERS')
+for sloupec in range(1, 13):
+    if sloupec == 1:
+       recommend = best_numbers(numbers_by_chances)
+    else:
+       recommend = random_predict(numbers_by_chances)
+
+    print(f'{sloupec}. - {recommend}')
 
 
 
-print(random_predict(numbers_by_chances))
+
+
+
