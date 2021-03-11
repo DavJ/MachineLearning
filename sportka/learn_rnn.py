@@ -137,10 +137,19 @@ def learn_and_predict_keras(all_batches, iterations=20):
 
 
 def numbers_vs_chances(y_predict, n=49):
-    norm = sum([y_predict[0][i] for i in range(98)])
-    numbers_vs_chances = ((i + 1, 0.5*(y_predict[0][i] + y_predict[0][i+49])/norm) for i in range(49))
-    sorted_numbers = sorted(numbers_vs_chances, key=lambda x: x[1], reverse=True)
-    return [key for key in sorted_numbers[0:n]]
+
+    def proper_weight(weight, w_max, w_min):
+        return (weight - w_min) / (w_max - w_min)
+
+    w_max = max([0.5*(y_predict[0][i] + y_predict[0][i+49]) for i in range(49)])
+    w_min = min([0.5*(y_predict[0][i] + y_predict[0][i+49]) for i in range(49)])
+    numbers_chances = ((i + 1, proper_weight(0.5 * (y_predict[0][i] + y_predict[0][i + 49]), w_max, w_min)) for i in range(49))
+    sorted_numbers = sorted(numbers_chances, key=lambda x: x[1], reverse=True)
+
+    w_max = max([x[1] for x in numbers_chances])
+    w_min = min([x[1] for x in numbers_chances])
+
+    return [(pair[0], pair[1]) for pair in sorted_numbers[0:n]]
 
 def best_numbers(numbers_vs_chances):
     return [n[0] for n in sorted(numbers_vs_chances, key=lambda x: x[1], reverse=True)[:6]]
@@ -153,6 +162,7 @@ def random_predict(numbers_vs_chances):
       if max([choice.count(c) for c in choice]) == 1:
         break
     return sorted(choice)
+
 
 ########################################################################################################################
 ############################## main program ############################################################################
