@@ -130,7 +130,7 @@ def learn_and_predict_keras(all_batches, iterations=20):
     )
 
     model.fit(
-        x_train, y_train, validation_data=test_data, batch_size=batch_size, epochs=1
+        x_train, y_train, validation_data=test_data, batch_size=batch_size, epochs=iterations
     )
 
     return model
@@ -164,7 +164,7 @@ print(dh)
 
 all_batches = [np.concatenate((draw.x_train_history_1, draw.x_train_history_2)) for draw in dh.draws]
 
-rnn_model = learn_and_predict_keras(all_batches)
+rnn_model = learn_and_predict_keras(all_batches, iterations=20)
 predicted = rnn_model.predict(all_batches[-1])
 
 print(predicted)
