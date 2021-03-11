@@ -1,15 +1,11 @@
 import csv
 from datetime import date, datetime
 
-import ephem
-import numpy as np
 from sportka.download import download_data_from_sazka
 import random
 import numpy as np
-import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
-
 
 class draw_history():
 
@@ -37,7 +33,6 @@ class draw():
             self.first = [int(x) for x in row[4:11]]
             self.second = [int(x) for x in row[11:18]]
             self.draw_history = draw_history
-            #self.noise = NOISE
 
             print('>OK')
         except:
@@ -82,9 +77,9 @@ class draw():
         history_index = index - difference
 
         if history_index >= 0:
-            return self.draw_history.draws[history_index].y_train_1 #+ next(self.noise)
+            return 7.0*self.draw_history.draws[history_index].y_train_1
         else:
-            return np.array([1/49.0 for number in range(1, 50)])
+            return np.array([0 for number in range(1, 50)])
 
     @property
     def x_train_history_2(self):
@@ -92,56 +87,44 @@ class draw():
         index = self.draw_history.draws.index(self)
         history_index = index - difference
         if history_index >= 0:
-            return self.draw_history.draws[history_index].y_train_2 #+ next(self.noise)
+            return 7.0*self.draw_history.draws[history_index].y_train_2
         else:
-            return np.array([1/49.0 for number in range(1, 50)])
-
-
-
-def date_to_x(date):
-
-    #consider also some astrological data
-    previous_new_moon = ephem.previous_new_moon(date)
-    next_new_moon = ephem.next_new_moon(date)
-    relative_lunation = (ephem.Date(date) - previous_new_moon) / (next_new_moon - previous_new_moon)
-
-    return np.array([date.day / 31.0, date.month / 12.0, date.year / 2019.0, date.weekday() / 6.0, relative_lunation])
-
+            return np.array([0 for number in range(1, 50)])
 
 def learn_and_predict_keras(all_batches, iterations=20):
-    batch_size = 1
-    size_train=len(all_batches) - 1
+    batch_size = None
+    size_train = len(all_batches) - 1
     test_size = 10
-    n_input = 49
-    n_output = 49
+    n_input = 98
+    n_output = 98
 
-
-    x_train = np.array(all_batches[:-2])
-    y_train = np.array(all_batches[2:])
+    x_train = np.array(all_batches[:-1])
+    y_train = np.array(all_batches[1:])
 
     validation_indexes = [random.choice(range(size_train)) for _ in range(10)]
     x_test = np.array([x_train[i] for i in validation_indexes])
     y_test = np.array([y_train[i] for i in validation_indexes])
-    test_data = None
+    test_data = (x_test, y_test)
+    #test_data = None
 
     model = keras.Sequential()
-    #model.add(layers.Input(shape=(None, ), input_dim=n_input))
-    model.add(layers.Embedding(input_dim=n_input, output_dim=20))
+
+    model.add(layers.Embedding(input_dim=n_input, output_dim=8))
 
     # The output of GRU will be a 3D tensor of shape (batch_size, timesteps, 256)
     model.add(layers.GRU(256, return_sequences=True))
 
-    # The output of SimpleRNN will be a 2D tensor of shape (batch_size, 128)
+    # The output of SimpleRNN will be a 2D tensor of shape (batch_size, 96)
     model.add(layers.SimpleRNN(n_output))
 
-    #model.add(layers.Dense(units=n_output))
+    model.add(layers.Dense(n_output))
 
     model.summary()
 
     #model = build_model(allow_cudnn_kernel=True)
 
     model.compile(
-        loss='categorical_crossentropy', #keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+        loss='categorical_crossentropy',                  #keras.losses.SparseCategoricalCrossentropy(from_logits=True),
         optimizer="sgd",
         metrics=["accuracy"],
     )
@@ -150,9 +133,22 @@ def learn_and_predict_keras(all_batches, iterations=20):
         x_train, y_train, validation_data=test_data, batch_size=batch_size, epochs=1
     )
 
-
-
     return model
+
+
+def best_numbers(y_predict, n=6):
+    norm = sum([y_predict[0][i] for i in range(98)])
+    numbers_vs_chances = ((i + 1, 0.5*(y_predict[0][i] + y_predict[0][i+49])/norm) for i in range(49))
+    sorted_numbers = sorted(numbers_vs_chances, key=lambda x: x[1], reverse=True)
+    return [key for key in sorted_numbers[0:n]]
+
+def random_predict(numbers_vs_chances):
+    weights = [w[1] for w in sorted(numbers_vs_chances, key=lambda x: x[0], reverse=False)]
+    while True:
+      choice=random.choices(range(1, 50), weights=weights, k=6)
+      if max([choice.count(c) for c in choice]) == 1:
+          break
+    return sorted(choice)
 
 ########################################################################################################################
 ############################## main program ############################################################################
@@ -162,10 +158,14 @@ DATE_PREDICT = '10.03.2021'
 dh = draw_history()
 print(dh)
 
-all_batches = [getattr(draw, attribute) for draw in dh.draws for attribute in ['x_train_history_1', 'x_train_history_2']]
-
+all_batches = [np.concatenate((draw.x_train_history_1, draw.x_train_history_2)) for draw in dh.draws]
 
 rnn_model = learn_and_predict_keras(all_batches)
 predicted = rnn_model.predict(all_batches[-1])
 
 print(predicted)
+numbers_by_chances=best_numbers(y_predict=predicted)
+
+
+
+print(random_predict(numbers_by_chances))
