@@ -10,8 +10,6 @@ import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
 
-#REALIZATIONS = 10
-
 
 class draw_history():
 
@@ -27,7 +25,6 @@ class draw_history():
                     self.draws.append(draw(row, draw_history=self))
 
                 is_header = False
-
 
 class draw():
 
@@ -45,10 +42,6 @@ class draw():
             print('>OK')
         except:
             print('>ERROR')
-
-    #@property
-    #def noise(self, mean=0, deviation=0.5):
-    #     yield np.random.normal(mean, deviation, 49)
 
     @property
     def x_train(self):
@@ -115,90 +108,46 @@ def date_to_x(date):
     return np.array([date.day / 31.0, date.month / 12.0, date.year / 2019.0, date.weekday() / 6.0, relative_lunation])
 
 
-def learn_and_predict_sportka(all_batches, iterations=20):
-    n_windows = 2
-    n_input = 49
-    n_output = 49
-    size_train = 201
-    r_neuron=128
-
-    X_batches = all_batches[:-1]
-    y_batches = all_batches[1:]
-    X_predict = all_batches[-1]
-
-    ## 1. Construct the tensors
-    X = tf.Variable(shape=[tf.cell.zero_state(), n_windows, n_input], dtype=tf.float32)
-    y = tf.Variable(shape=[tf.cell.zero_state(), n_windows, n_output], dtype=tf.float32)
-
-    ## 2. create the model
-    basic_cell = tf.contrib.rnn.BasicRNNCell(num_units=r_neuron, activation=tf.nn.relu)
-    rnn_output, states = tf.nn.dynamic_rnn(basic_cell, X, dtype=tf.float32)
-
-    stacked_rnn_output = tf.reshape(rnn_output, [-1, r_neuron])
-    stacked_outputs = tf.layers.dense(stacked_rnn_output, n_output)
-    outputs = tf.reshape(stacked_outputs, [-1, n_windows, n_output])
-
-    ## 3. Loss + optimization
-    learning_rate = 0.001
-
-    loss = tf.reduce_sum(tf.square(outputs - y))
-    optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
-    training_op = optimizer.minimize(loss)
-
-    ## 4. Train
-    init = tf.global_variables_initializer()
-
-    with tf.Session() as sess:
-        init.run()
-        for iters in range(iterations):
-           sess.run(training_op, feed_dict={X: X_batches, y: y_batches})
-           if iters % 150 == 0:
-               mse = loss.eval(feed_dict={X: X_batches, y: y_batches})
-               print(iters, "\tMSE:", mse)
-
-        y_pred = sess.run(outputs, feed_dict={X: X_predict})
-
-    return y_pred
-
 def learn_and_predict_keras(all_batches, iterations=20):
-    batch_size = 2
+    batch_size = 1
     size_train=len(all_batches) - 1
     test_size = 10
     n_input = 49
     n_output = 49
-    size_train = l
-    r_neuron=128
 
-    x_train = all_batches[:-1]
-    y_train = all_batches[1:]
+
+    x_train = np.array(all_batches[:-2])
+    y_train = np.array(all_batches[2:])
 
     validation_indexes = [random.choice(range(size_train)) for _ in range(10)]
-    x_test = [x_train[i] for i in validation_indexes]
-    y_test = [y_train[i] for i in validation_indexes]
+    x_test = np.array([x_train[i] for i in validation_indexes])
+    y_test = np.array([y_train[i] for i in validation_indexes])
+    test_data = None
 
     model = keras.Sequential()
-    model.add(layers.Embedding(input_dim=n_input, output_dim=20, statefull=True))
+    #model.add(layers.Input(shape=(None, ), input_dim=n_input))
+    model.add(layers.Embedding(input_dim=n_input, output_dim=20))
 
     # The output of GRU will be a 3D tensor of shape (batch_size, timesteps, 256)
-    model.add(layers.GRU(256, return_sequences=True, statefull=True))
+    model.add(layers.GRU(256, return_sequences=True))
 
     # The output of SimpleRNN will be a 2D tensor of shape (batch_size, 128)
-    model.add(layers.SimpleRNN(128, statefull=True))
+    model.add(layers.SimpleRNN(n_output))
 
-    model.add(layers.Dense(10, statefull=True))
+    #model.add(layers.Dense(units=n_output))
 
     model.summary()
 
     #model = build_model(allow_cudnn_kernel=True)
 
     model.compile(
-        loss=keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+        loss='categorical_crossentropy', #keras.losses.SparseCategoricalCrossentropy(from_logits=True),
         optimizer="sgd",
         metrics=["accuracy"],
     )
 
     model.fit(
-        x_train, y_train, validation_data=(x_test, y_test), batch_size=batch_size, epochs=1
+        x_train, y_train, validation_data=test_data, batch_size=batch_size, epochs=1
     )
 
 
@@ -213,7 +162,7 @@ DATE_PREDICT = '10.03.2021'
 dh = draw_history()
 print(dh)
 
-all_batches = [[draw.x_train_history_1, draw.x_train_history_2] for draw in dh.draws]
+all_batches = [getattr(draw, attribute) for draw in dh.draws for attribute in ['x_train_history_1', 'x_train_history_2']]
 
 
 rnn_model = learn_and_predict_keras(all_batches)
