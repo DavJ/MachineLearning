@@ -146,9 +146,6 @@ def numbers_vs_chances(y_predict, n=49):
     numbers_chances = ((i + 1, proper_weight(0.5 * (y_predict[0][i] + y_predict[0][i + 49]), w_max, w_min)) for i in range(49))
     sorted_numbers = sorted(numbers_chances, key=lambda x: x[1], reverse=True)
 
-    w_max = max([x[1] for x in numbers_chances])
-    w_min = min([x[1] for x in numbers_chances])
-
     return [(pair[0], pair[1]) for pair in sorted_numbers[0:n]]
 
 def best_numbers(numbers_vs_chances):
