@@ -169,7 +169,7 @@ print(dh)
 
 all_batches = [np.concatenate((draw.x_train_history_1, draw.x_train_history_2)) for draw in dh.draws]
 
-rnn_model = learn_and_predict_keras(all_batches, iterations=20)
+rnn_model = learn_and_predict_keras(all_batches, iterations=55)
 predicted = rnn_model.predict(all_batches[-1])
 
 print(predicted)
@@ -179,16 +179,11 @@ numbers_by_chances = numbers_vs_chances(y_predict=predicted)
 print(numbers_by_chances)
 
 print('\n\n\nRECOMMENDED NUMBERS')
-for sloupec in range(1, 13):
+for sloupec in range(1, 10):
     if sloupec == 1:
        recommend = best_numbers(numbers_by_chances)
     else:
        recommend = random_predict(numbers_by_chances)
 
     print(f'{sloupec}. - {recommend}')
-
-
-
-
-
 

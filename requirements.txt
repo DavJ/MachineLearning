@@ -1,12 +1,12 @@
-wrapt==1.11.2
-grpcio==1.25.0
-tensorflow==2.0
-numpy==1.16.5
-scipy==1.2.2
-h5py==2.8.0
-pillow==5.3.0
+#wrapt
+grpcio
+tensorflow
+numpy
+scipy
+h5py
+pillow
 #dlib
-keras==2.2.4
+keras
 #opencv-python
 scikit-image
 thriftpy2
@@ -21,4 +21,5 @@ requests
 pip
 pykalman
 webdriver-manager
-
+numba
+perceptilabs
