@@ -1,3 +1,13 @@
 p36
 source/course
 sportka/*.csv
+models/
+*.weights.h5
+*.h5
+config.json
+predictions/
+__pycache__/
+*.pyc
+*.pyo
+*.log
+.DS_Store

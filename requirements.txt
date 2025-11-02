@@ -1,12 +1,12 @@
 wrapt
 grpcio
-#tensorflow
-numpy
+tensorflow>=2.13.0
+numpy>=1.24.0
 scipy
 h5py
 pillow
 #dlib
-keras
+#keras  # Now part of tensorflow
 #opencv-python
 scikit-image
 thriftpy2
@@ -20,4 +20,5 @@ reportlab
 requests
 pip
 pykalman
-python-binance		
+python-binance
+ephem
