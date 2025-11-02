@@ -9,8 +9,34 @@ Features:
 - Print numbers
 """
 
-import tkinter as tk
-from tkinter import ttk, filedialog, messagebox, scrolledtext
+try:
+    import tkinter as tk
+    from tkinter import ttk, filedialog, messagebox, scrolledtext
+    TKINTER_AVAILABLE = True
+except ImportError:
+    TKINTER_AVAILABLE = False
+    # Create dummy classes to avoid import errors
+    class tk:
+        Tk = object
+        Label = object
+        StringVar = object
+        IntVar = object
+        BooleanVar = object
+        DoubleVar = object
+        Listbox = object
+        END = None
+        W = None
+        X = None
+        BOTH = None
+        SUNKEN = None
+        NORMAL = None
+        DISABLED = None
+        BOTTOM = None
+        LEFT = None
+    
+    print("Warning: tkinter not available. GUI functionality disabled.")
+    print("Install tkinter with: sudo apt-get install python3-tk")
+
 import threading
 import queue
 import os
@@ -23,13 +49,16 @@ import numpy as np
 class SportkaGUI:
     """Main GUI application for Sportka Predictor."""
     
-    def __init__(self, root: tk.Tk):
+    def __init__(self, root):
         """
         Initialize the GUI.
         
         Args:
             root: Tkinter root window
         """
+        if not TKINTER_AVAILABLE:
+            raise RuntimeError("Tkinter is not available")
+        
         self.root = root
         self.root.title("Sportka Predictor - Advanced ML System")
         self.root.geometry("1000x800")
@@ -477,7 +506,7 @@ class SportkaGUI:
         """Load a saved model."""
         filename = filedialog.askopenfilename(
             title="Select Model File",
-            filetypes=[("HDF5 files", "*.h5"), ("All files", "*.*")],
+            filetypes=[("Model files", "*.weights.h5 *.h5"), ("All files", "*.*")],
             initialdir="./models"
         )
         
@@ -727,9 +756,20 @@ class SportkaGUI:
 
 def main():
     """Main entry point for the GUI application."""
+    if not TKINTER_AVAILABLE:
+        print("Error: GUI requires tkinter which is not installed.")
+        print("Please install tkinter:")
+        print("  - Ubuntu/Debian: sudo apt-get install python3-tk")
+        print("  - macOS: tkinter should be included with Python")
+        print("  - Windows: tkinter should be included with Python")
+        print("\nAlternatively, use the command-line interface:")
+        print("  python -m sportka.learn_improved")
+        return 1
+    
     root = tk.Tk()
     app = SportkaGUI(root)
     root.mainloop()
+    return 0
 
 
 if __name__ == '__main__':

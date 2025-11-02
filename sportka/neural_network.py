@@ -228,7 +228,7 @@ class SportkaPredictor:
             raise ValueError("No model to save")
         
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-        weights_path = os.path.join(self.model_dir, f'{name}_{timestamp}.h5')
+        weights_path = os.path.join(self.model_dir, f'{name}_{timestamp}.weights.h5')
         
         self.model.save_weights(weights_path)
         
@@ -259,7 +259,7 @@ class SportkaPredictor:
             weights_path: Path to weights file
         """
         # Try to load metadata
-        base_path = weights_path.replace('.h5', '')
+        base_path = weights_path.replace('.weights.h5', '').replace('.h5', '')
         metadata_path = base_path + '_metadata.json'
         
         if os.path.exists(metadata_path):
@@ -294,7 +294,7 @@ class SportkaPredictor:
         models = [
             os.path.join(self.model_dir, f)
             for f in os.listdir(self.model_dir)
-            if f.endswith('.h5')
+            if f.endswith('.weights.h5') or (f.endswith('.h5') and not f.endswith('.weights.h5'))
         ]
         
         return sorted(models, reverse=True)  # Most recent first
