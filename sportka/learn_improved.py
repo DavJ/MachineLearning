@@ -128,17 +128,19 @@ def main():
         
         # Check if we should load existing model
         existing_models = predictor.list_saved_models()
-        if existing_models:
+        load_existing = False
+        
+        if existing_models and os.getenv('INTERACTIVE', '1') == '1':
             print(f"\n  Found {len(existing_models)} saved model(s)")
             print(f"  Latest: {os.path.basename(existing_models[0])}")
             
             response = input("\n  Load existing model? (y/n): ").lower()
-            if response == 'y':
-                predictor.load_weights(existing_models[0])
-                print("✓ Model loaded from disk")
-                skip_training = True
-            else:
-                skip_training = False
+            load_existing = (response == 'y')
+        
+        if load_existing:
+            predictor.load_weights(existing_models[0])
+            print("✓ Model loaded from disk")
+            skip_training = True
         else:
             skip_training = False
         

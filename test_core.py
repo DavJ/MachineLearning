@@ -94,4 +94,3 @@ if tests_passed == tests_total:
 else:
     print(f'⚠️  {tests_total - tests_passed} test(s) failed')
     sys.exit(1)
-print('=' * 50)

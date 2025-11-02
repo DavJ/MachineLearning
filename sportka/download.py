@@ -1,7 +1,13 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.common.exceptions import WebDriverException
 
 def download_data_from_sazka(directory='/tmp'):
+    """
+    Download lottery data from Sazka website.
+    
+    Requires Chrome and ChromeDriver to be installed.
+    """
     options = webdriver.ChromeOptions()
     options.add_argument('--headless')
     options.add_argument('--window-size=1200x3600')
@@ -12,6 +18,16 @@ def download_data_from_sazka(directory='/tmp'):
 
     try:
         driver = webdriver.Chrome(options=options)
+    except WebDriverException as e:
+        print(f"Error: Could not start Chrome WebDriver")
+        print(f"Please ensure Chrome and ChromeDriver are installed:")
+        print(f"  - Chrome: https://www.google.com/chrome/")
+        print(f"  - ChromeDriver: https://chromedriver.chromium.org/")
+        print(f"\nAlternatively, download data manually from:")
+        print(f"  https://www.sazka.cz/loterie/sportka/statistiky")
+        raise
+    
+    try:
         driver.implicitly_wait(10)
 
         driver.get('https://www.sazka.cz/loterie/sportka/statistiky')
@@ -23,4 +39,6 @@ def download_data_from_sazka(directory='/tmp'):
     except Exception as e:
         print(f"Warning: Could not download data from Sazka: {e}")
         print("Please download manually from https://www.sazka.cz/loterie/sportka/statistiky")
+        if 'driver' in locals():
+            driver.quit()
         raise

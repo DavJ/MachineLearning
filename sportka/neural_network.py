@@ -20,7 +20,8 @@ from typing import Optional, Tuple, Callable, Dict, Any
 try:
     # Use Metal Performance Shaders on M1 Mac
     tf.config.set_visible_devices([], 'GPU')  # Let TensorFlow auto-detect
-except:
+except RuntimeError as e:
+    # GPU configuration may fail if not available
     pass
 
 
