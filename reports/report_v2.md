@@ -148,7 +148,12 @@ Similar performance to the forward direction implies no genuine temporal signal.
 
 ## Plots
 
-*(Plots not generated — matplotlib may be unavailable.)*
+![Performance over time](sportka_v2_perf_over_time.png)
+
+*Rolling Recall@6 over the test set (30-draw window).*
+![Distribution divergence](sportka_v2_dist_divergence.png)
+
+*KL divergence from uniform distribution per model.*
 
 ---
 
