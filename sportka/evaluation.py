@@ -146,15 +146,21 @@ def walk_forward_eval(
     Fit the model on the training split and evaluate on val and test splits.
 
     Uses temporal alignment: X[i] predicts draw i+1 (see _align_xy).
+    Time features are normalised using the global training-set draw-index
+    range to avoid per-split re-centring.
 
     Returns:
         (val_metrics, test_metrics) — dicts from compute_all_metrics.
     """
     train_df, val_df, test_df = walk_forward_split(df, train_frac, val_frac)
 
-    X_train, Y_train = _align_xy(train_df, feature_groups)
-    X_val,   Y_val   = _align_xy(val_df,   feature_groups)
-    X_test,  Y_test  = _align_xy(test_df,  feature_groups)
+    # Determine global normalisation range from the training split only.
+    # Always computed; only used when 'time' features are requested (build_features ignores it otherwise).
+    max_draw_index = float(train_df["draw_index"].max())
+
+    X_train, Y_train = _align_xy(train_df, feature_groups, max_draw_index=max_draw_index)
+    X_val,   Y_val   = _align_xy(val_df,   feature_groups, max_draw_index=max_draw_index)
+    X_test,  Y_test  = _align_xy(test_df,  feature_groups, max_draw_index=max_draw_index)
 
     model.fit(X_train, Y_train)
 
@@ -177,7 +183,11 @@ def _binary_matrix(df: pd.DataFrame) -> np.ndarray:
     return mat
 
 
-def _align_xy(df: pd.DataFrame, feature_groups: List[str]):
+def _align_xy(
+    df: pd.DataFrame,
+    feature_groups: List[str],
+    max_draw_index: float | None = None,
+):
     """
     Build temporally aligned X and Y matrices.
 
@@ -186,10 +196,14 @@ def _align_xy(df: pd.DataFrame, feature_groups: List[str]):
 
     This avoids data leakage: features of draw i cannot contain draw i+1's
     numbers.  The last draw has no target, so n-1 pairs are returned.
+
+    Args:
+        max_draw_index: Passed to build_features for consistent time
+            normalisation across all splits (use the training-set max).
     """
-    X_all = build_features(df, feature_groups)   # (n, d)
-    Y_all = _binary_matrix(df)                   # (n, 49)
-    return X_all[:-1], Y_all[1:]                 # (n-1, d), (n-1, 49)
+    X_all = build_features(df, feature_groups, max_draw_index=max_draw_index)   # (n, d)
+    Y_all = _binary_matrix(df)                                                    # (n, 49)
+    return X_all[:-1], Y_all[1:]                                                  # (n-1, d), (n-1, 49)
 
 
 # ---------------------------------------------------------------------------

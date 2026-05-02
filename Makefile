@@ -1,6 +1,6 @@
 PYTHON=python3
 
-.PHONY: install test run run-null run-real clean
+.PHONY: install test run null real clean
 
 install:
 	$(PYTHON) -m pip install --upgrade pip
@@ -12,11 +12,10 @@ test:
 run:
 	$(PYTHON) sportka/experiments/run_experiment_v2.py
 
-# run-null is an alias for run; both use synthetic data when no --csv is given
-run-null:
-	$(PYTHON) sportka/experiments/run_experiment_v2.py
+null:
+	$(PYTHON) sportka/experiments/run_null_test.py
 
-run-real:
+real:
 	$(PYTHON) sportka/experiments/run_experiment_v2.py --csv data/sportka.csv
 
 clean:

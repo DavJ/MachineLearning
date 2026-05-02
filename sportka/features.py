@@ -296,20 +296,34 @@ FEATURE_DIMS = {
 }
 
 
-def build_features(df: pd.DataFrame, groups: List[str] | None = None) -> np.ndarray:
+def build_features(
+    df: pd.DataFrame,
+    groups: List[str] | None = None,
+    max_draw_index: float | None = None,
+) -> np.ndarray:
     """
     Build a feature matrix from the given groups.
 
     Args:
-        df:     DataFrame with columns [draw_index, date, numbers].
-        groups: Subset of FEATURE_GROUPS keys (default: all).
+        df:             DataFrame with columns [draw_index, date, numbers].
+        groups:         Subset of FEATURE_GROUPS keys (default: all).
+        max_draw_index: If provided, pass to :func:`complex_time_features` so
+                        the draw-index is normalised by the global training
+                        range rather than the per-split range.  This prevents
+                        the time axis from being re-centred on each split.
 
     Returns:
         np.ndarray of shape (n_draws, total_features).
     """
     if groups is None:
         groups = list(FEATURE_GROUPS.keys())
-    arrays = [FEATURE_GROUPS[g](df) for g in groups]
+
+    arrays = []
+    for g in groups:
+        if g == "time":
+            arrays.append(complex_time_features(df, max_draw_index=max_draw_index))
+        else:
+            arrays.append(FEATURE_GROUPS[g](df))
     return np.concatenate(arrays, axis=1)
 
 
