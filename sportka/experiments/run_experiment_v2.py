@@ -252,7 +252,12 @@ def run_experiment(
         Xtr, Xvl, Xte = cfg["X_tr"], cfg["X_vl"], cfg["X_te"]
 
         t0 = time.time()
-        model.fit(Xtr, Y_tr)
+        fitted = model.fit(Xtr, Y_tr)
+
+        if fitted is None:
+            print(f"  {mname:<20} — skipped (sklearn not available)")
+            continue
+
         elapsed = time.time() - t0
 
         val_pred = model.predict_proba(Xvl)
