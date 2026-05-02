@@ -48,10 +48,14 @@ def theta_transform(
         Transformed float32 array of the same shape as v.
     """
     v_f = np.asarray(v, dtype=np.float64)
-    out = np.zeros_like(v_f)
     two_pi_v = 2.0 * np.pi * v_f
-    for n in range(N + 1):
-        out += np.exp(-alpha * n * n) * np.cos(n * two_pi_v)
+    # Pre-compute decay weights once (shape (N+1,)) to avoid repeating
+    # the exponential calculation for every element in v.
+    ns = np.arange(N + 1, dtype=np.float64)
+    weights = np.exp(-alpha * ns * ns)   # (N+1,)
+    out = np.zeros_like(v_f)
+    for n, w in enumerate(weights):
+        out += w * np.cos(n * two_pi_v)
     return out.astype(np.float32)
 
 
