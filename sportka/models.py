@@ -134,6 +134,7 @@ class LogisticRegressionModel(BaseModel):
     """
     Independent logistic regression for each of the 49 numbers.
     Treats each number as an independent binary classification problem.
+    Skipped gracefully when scikit-learn is not available.
     """
 
     name = "logistic_regression"
@@ -143,8 +144,11 @@ class LogisticRegressionModel(BaseModel):
         self._max_iter = max_iter
         self._solver = solver
         self._models: list = []
+        self._skip = not SKLEARN_AVAILABLE
 
     def fit(self, X_train: np.ndarray, Y_train: np.ndarray) -> "LogisticRegressionModel":
+        if self._skip:
+            return self
         from sklearn.linear_model import LogisticRegression
 
         self._models = []
@@ -162,6 +166,8 @@ class LogisticRegressionModel(BaseModel):
     def predict_proba(self, X: np.ndarray) -> np.ndarray:
         n = len(X)
         out = np.full((n, 49), 7.0 / 49.0, dtype=np.float32)
+        if self._skip:
+            return out
         for j, clf in enumerate(self._models):
             if clf is not None:
                 out[:, j] = clf.predict_proba(X)[:, 1].astype(np.float32)

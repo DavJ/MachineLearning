@@ -12,6 +12,7 @@ test:
 run:
 	$(PYTHON) sportka/experiments/run_experiment_v2.py
 
+# run-null is an alias for run; both use synthetic data when no --csv is given
 run-null:
 	$(PYTHON) sportka/experiments/run_experiment_v2.py
 
