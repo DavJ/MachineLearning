@@ -17,6 +17,12 @@ from __future__ import annotations
 import numpy as np
 from typing import Optional
 
+try:
+    from sklearn.neural_network import MLPClassifier
+    SKLEARN_AVAILABLE = True
+except ImportError:
+    SKLEARN_AVAILABLE = False
+
 
 # ---------------------------------------------------------------------------
 # Base class
@@ -69,8 +75,8 @@ class GlobalFreqPredictor(BaseModel):
 
     def fit(self, X_train: np.ndarray, Y_train: np.ndarray) -> "GlobalFreqPredictor":
         freq = Y_train.sum(axis=0).astype(np.float64)
-        total = freq.sum()
-        self._freq = (freq / total).astype(np.float32) if total > 0 else np.full(49, 1.0 / 49.0, dtype=np.float32)
+        n_draws = len(Y_train)
+        self._freq = (freq / n_draws).astype(np.float32) if n_draws > 0 else np.full(49, 7.0 / 49.0, dtype=np.float32)
         return self
 
     def predict_proba(self, X: np.ndarray) -> np.ndarray:
@@ -81,37 +87,41 @@ class GlobalFreqPredictor(BaseModel):
 class RollingFreqPredictor(BaseModel):
     """
     Uses the last `window` draws' frequencies as the probability estimate.
-    Requires that X already contains a rolling-frequency feature block
-    (first 49 columns are assumed to be the rolling-window-1 frequencies).
+    Requires that X already contains a rolling-frequency feature block.
 
-    For simplicity this predictor takes the rolling-freq-1 slice from X
-    when X contains winding features, otherwise falls back to global freq.
+    The offset into X is computed via compute_feature_layout if the layout
+    argument is supplied, otherwise the hardcoded default (after base + time
+    features) is used.
     """
 
     name = "rolling_frequency"
 
-    def __init__(self, rolling_freq_feature_index: int = 49 + 13):
+    def __init__(self, rolling_freq_feature_index: int | None = None):
         """
         rolling_freq_feature_index: index of the first rolling-window-1 feature
-        in the combined feature matrix (after base + time features = 49+13=62).
+        in the combined feature matrix.  If None, the offset is derived from
+        the feature layout (base=49, time=13 → offset=62).
         """
-        self._offset = rolling_freq_feature_index
+        if rolling_freq_feature_index is None:
+            from sportka.feature_layout import compute_feature_layout
+            layout = compute_feature_layout(["base", "time", "winding"])
+            self._offset = layout["winding"][0]
+        else:
+            self._offset = rolling_freq_feature_index
         self._global_freq: Optional[np.ndarray] = None
 
     def fit(self, X_train: np.ndarray, Y_train: np.ndarray) -> "RollingFreqPredictor":
         freq = Y_train.sum(axis=0).astype(np.float64)
-        total = freq.sum()
-        self._global_freq = (freq / total).astype(np.float32) if total > 0 else np.full(49, 1.0 / 49.0, dtype=np.float32)
+        n_draws = len(Y_train)
+        self._global_freq = (freq / n_draws).astype(np.float32) if n_draws > 0 else np.full(49, 7.0 / 49.0, dtype=np.float32)
         return self
 
     def predict_proba(self, X: np.ndarray) -> np.ndarray:
         n_cols = X.shape[1]
         if n_cols > self._offset + 49:
             probs = X[:, self._offset: self._offset + 49].astype(np.float32)
-            # Normalise rows
-            row_sum = probs.sum(axis=1, keepdims=True)
-            row_sum = np.where(row_sum == 0, 1.0, row_sum)
-            return probs / row_sum
+            # Features already represent P(number in draw); no re-normalisation needed
+            return probs
         # Fallback
         return np.tile(self._global_freq, (len(X), 1))
 
@@ -129,8 +139,6 @@ class LogisticRegressionModel(BaseModel):
     name = "logistic_regression"
 
     def __init__(self, C: float = 0.1, max_iter: int = 200, solver: str = "saga"):
-        from sklearn.linear_model import LogisticRegression
-
         self._C = C
         self._max_iter = max_iter
         self._solver = solver
@@ -166,6 +174,7 @@ class MLPModel(BaseModel):
     trained independently per number (binary outputs).
 
     hidden_layer_sizes controls the architecture (1–2 layers).
+    Skipped gracefully when scikit-learn is not available.
     """
 
     name = "mlp"
@@ -182,9 +191,11 @@ class MLPModel(BaseModel):
         self._alpha = alpha
         self._random_state = random_state
         self._models: list = []
+        self._skip = not SKLEARN_AVAILABLE
 
     def fit(self, X_train: np.ndarray, Y_train: np.ndarray) -> "MLPModel":
-        from sklearn.neural_network import MLPClassifier
+        if self._skip:
+            return self
 
         self._models = []
         for j in range(49):
@@ -205,6 +216,8 @@ class MLPModel(BaseModel):
     def predict_proba(self, X: np.ndarray) -> np.ndarray:
         n = len(X)
         out = np.full((n, 49), 7.0 / 49.0, dtype=np.float32)
+        if self._skip:
+            return out
         for j, clf in enumerate(self._models):
             if clf is not None:
                 out[:, j] = clf.predict_proba(X)[:, 1].astype(np.float32)

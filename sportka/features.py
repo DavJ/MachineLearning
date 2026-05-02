@@ -41,7 +41,7 @@ def base_features(df: pd.DataFrame) -> np.ndarray:
 # 2. Complex time features
 # ---------------------------------------------------------------------------
 
-def complex_time_features(df: pd.DataFrame) -> np.ndarray:
+def complex_time_features(df: pd.DataFrame, max_draw_index: float | None = None) -> np.ndarray:
     """
     Cyclical and normalised temporal features.
 
@@ -50,10 +50,18 @@ def complex_time_features(df: pd.DataFrame) -> np.ndarray:
         [1]  sin(weekday)  [2] cos(weekday)
         [3]  sin(month)    [4] cos(month)
         [5..12] sin/cos for draw-index periods [4, 16, 52, 104]
+
+    Args:
+        max_draw_index: If provided, normalise the draw index by this value
+            (avoids per-split min/max normalisation).  If None, falls back
+            to per-split range normalisation.
     """
     n = len(df)
     idx = df["draw_index"].values.astype(np.float32)
-    norm_idx = (idx - idx.min()) / max(idx.max() - idx.min(), 1.0)
+    if max_draw_index is not None:
+        norm_idx = idx / max(float(max_draw_index), 1.0)
+    else:
+        norm_idx = (idx - idx.min()) / max(idx.max() - idx.min(), 1.0)
 
     dates = pd.to_datetime(df["date"])
     weekday = dates.dt.dayofweek.values.astype(np.float32)  # 0–6
@@ -93,7 +101,7 @@ def _rolling_freq(numbers_list: List[List[int]], window: int) -> np.ndarray:
         for nums in numbers_list[start: i + 1]:
             for num in nums:
                 freq[num - 1] += 1.0
-        out[i] = freq / (count * 7)  # normalise by expected hits per draw
+        out[i] = freq / count  # P(number in draw); sum ≈ 7
     return out
 
 
