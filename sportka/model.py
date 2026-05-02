@@ -222,7 +222,7 @@ class UBTCNNv2(BaseModel):
 
     def fit(self, X_train: np.ndarray, Y_train: np.ndarray) -> "UBTCNNv2 | None":
         if not SKLEARN_AVAILABLE:
-            print("⚠️ sklearn not available — skipping MLP model")
+            print("⚠️ sklearn not available — skipping CNN model")
             return None
 
         Xf = self._extract_features(X_train)

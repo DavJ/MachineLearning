@@ -253,11 +253,12 @@ def run_experiment(
 
         t0 = time.time()
         fitted = model.fit(Xtr, Y_tr)
-        elapsed = time.time() - t0
 
         if fitted is None:
             print(f"  {mname:<20} — skipped (sklearn not available)")
             continue
+
+        elapsed = time.time() - t0
 
         val_pred = model.predict_proba(Xvl)
         test_pred = model.predict_proba(Xte)
