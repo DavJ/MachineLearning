@@ -1,0 +1,42 @@
+python3 sportka/experiments/run_experiment_v2.py
+======================================================================
+  Sportka UBT/Theta Experiment v2
+======================================================================
+
+[1/6] Loading data …
+  No CSV provided — using synthetic random data (null hypothesis).
+  Generated 800 synthetic draws.
+  Split: train=560, val=120, test=120
+
+[2/6] Building v2 multi-scale theta features …
+  windows=[1, 16, 52], alpha=0.5, N=7, include_raw=True  →  4 channels × 49 = 196 features
+  Tensor shape: (559, 4, 7, 7)  →  flat: (559, 196)
+
+[3/6] Training & evaluating models …
+  random_uniform       — bootstrapping CI …
+    BCE=0.4101  recall@6=0.1285  avg_hits_6=0.8992  (0.0s)
+  global_frequency     — bootstrapping CI …
+    BCE=0.4114  recall@6=0.1080  avg_hits_6=0.7563  (0.0s)
+  rolling_frequency    — bootstrapping CI …
+    BCE=0.4114  recall@6=0.1080  avg_hits_6=0.7563  (0.0s)
+  ubt_mlp_v1           — bootstrapping CI …
+    BCE=0.4101  recall@6=0.1285  avg_hits_6=0.8992  (0.0s)
+⚠️ sklearn not available — skipping MLP model
+  ubt_mlp_v2           — skipped (sklearn not available)
+⚠️ sklearn not available — skipping CNN model
+  ubt_cnn_v2           — skipped (sklearn not available)
+
+[4/6] Running control tests (ubt_mlp_v2) …
+⚠️ sklearn not available — skipping MLP model
+⚠️ sklearn not available — skipping MLP model
+  Shuffled labels — BCE=0.4101  recall@6=0.1285
+  Reversed time   — BCE=0.4101  recall@6=0.1357
+
+[5/6] Generating plots …
+  WARNING: Could not generate plots: No module named 'matplotlib'
+
+[6/6] Writing report …
+  Report: /Users/davidjaros/workspace/MachineLearning/reports/report_v2.md
+
+✓ Experiment v2 complete.
+

@@ -76,11 +76,10 @@ Hyperparameters: **N=7**, **α=0.5**.
 
 | Model | bce | recall_at_6 | recall_at_10 | kl_vs_uniform | avg_hits_6 | Train(s) |
 |-------|--------|--------|--------|--------|--------|--------|
-| random_uniform | 0.4101 | 0.1224 | 0.2041 | 0.0000 | 0.8571 | 0.0 |
-| global_frequency | 0.5748 | 0.1080 | 0.1837 | 0.0063 | 0.7563 | 0.0 |
-| rolling_frequency | 0.5748 | 0.1080 | 0.1837 | 0.0063 | 0.7563 | 0.0 |
-| ubt_mlp_v1 | 1.2274 | 0.1261 | 0.2209 | 4.6520 | 0.8824 | 39.5 |
-| ubt_mlp_v2 | 1.2274 | 0.1261 | 0.2209 | 4.6520 | 0.8824 | 39.6 |
+| random_uniform | 0.4101 | 0.1285 | 0.2185 | 0.0000 | 0.8992 | 0.0 |
+| global_frequency | 0.4114 | 0.1080 | 0.1837 | 0.0063 | 0.7563 | 0.0 |
+| rolling_frequency | 0.4114 | 0.1080 | 0.1837 | 0.0063 | 0.7563 | 0.0 |
+| ubt_mlp_v1 | 0.4101 | 0.1285 | 0.2185 | 0.0000 | 0.8992 | 0.0 |
 
 **Metrics:**
 - `bce`: binary cross-entropy (lower = better)
@@ -98,33 +97,22 @@ Hyperparameters: **N=7**, **α=0.5**.
 | Metric | Estimate [95% CI] |
 |--------|-------------------|
 | bce | 0.4101 [0.4101, 0.4101] |
-| recall_at_6 | 0.1224 [0.1020, 0.1429] |
-| recall_at_10 | 0.2041 [0.1801, 0.2281] |
+| recall_at_6 | 0.1285 [0.1080, 0.1525] |
+| recall_at_10 | 0.2185 [0.1945, 0.2437] |
 | kl_vs_uniform | 0.0000 [0.0000, 0.0000] |
-| avg_hits_6 | 0.8571 [0.7143, 1.0000] |
-| avg_hits_10 | 1.4286 [1.2605, 1.5966] |
+| avg_hits_6 | 0.8992 [0.7563, 1.0672] |
+| avg_hits_10 | 1.5294 [1.3613, 1.7059] |
 
 ### rolling_frequency
 
 | Metric | Estimate [95% CI] |
 |--------|-------------------|
-| bce | 0.5748 [0.5736, 0.5758] |
+| bce | 0.4114 [0.4101, 0.4126] |
 | recall_at_6 | 0.1080 [0.0912, 0.1261] |
 | recall_at_10 | 0.1837 [0.1609, 0.2077] |
 | kl_vs_uniform | 0.0063 [0.0063, 0.0063] |
 | avg_hits_6 | 0.7563 [0.6384, 0.8824] |
 | avg_hits_10 | 1.2857 [1.1261, 1.4538] |
-
-### ubt_mlp_v2
-
-| Metric | Estimate [95% CI] |
-|--------|-------------------|
-| bce | 1.2274 [1.1760, 1.2733] |
-| recall_at_6 | 0.1261 [0.1056, 0.1453] |
-| recall_at_10 | 0.2209 [0.1920, 0.2509] |
-| kl_vs_uniform | 4.6520 [4.5460, 4.7733] |
-| avg_hits_6 | 0.8824 [0.7395, 1.0168] |
-| avg_hits_10 | 1.5462 [1.3443, 1.7563] |
 
 ---
 
@@ -136,12 +124,12 @@ perform no better than random on this control.
 
 | Metric | Value |
 |--------|-------|
-| bce | 1.1952 |
-| recall_at_6 | 0.1261 |
-| recall_at_10 | 0.2077 |
-| kl_vs_uniform | 4.5110 |
-| avg_hits_6 | 0.8824 |
-| avg_hits_10 | 1.4538 |
+| bce | 0.4101 |
+| recall_at_6 | 0.1285 |
+| recall_at_10 | 0.2185 |
+| kl_vs_uniform | 0.0000 |
+| avg_hits_6 | 0.8992 |
+| avg_hits_10 | 1.5294 |
 
 ### Reversed-time test
 Data reversed chronologically (future predicts past).
@@ -149,12 +137,12 @@ Similar performance to the forward direction implies no genuine temporal signal.
 
 | Metric | Value |
 |--------|-------|
-| bce | 1.2746 |
-| recall_at_6 | 0.1261 |
-| recall_at_10 | 0.2137 |
-| kl_vs_uniform | 5.0052 |
-| avg_hits_6 | 0.8824 |
-| avg_hits_10 | 1.4958 |
+| bce | 0.4101 |
+| recall_at_6 | 0.1357 |
+| recall_at_10 | 0.2161 |
+| kl_vs_uniform | 0.0000 |
+| avg_hits_6 | 0.9496 |
+| avg_hits_10 | 1.5126 |
 
 ---
 
@@ -175,8 +163,8 @@ Similar performance to the forward direction implies no genuine temporal signal.
 - If the v2 model recall@6 falls within the random baseline CI, the null
   hypothesis cannot be rejected.
 
-- Random baseline recall@6: **0.1224** (95% CI [0.1020, 0.1429])
-- UBT v2 model recall@6:    **0.1261** (95% CI [0.1056, 0.1453])
+- Random baseline recall@6: **0.1285** (95% CI [0.1080, 0.1525])
+- UBT v2 model recall@6:    **nan** (95% CI [nan, nan])
 
 ✅  The v2 model's performance is **within** the random baseline CI.
     We **cannot** reject the null hypothesis.  No statistically significant
