@@ -1,5 +1,5 @@
 mac: 
-	python3 -m venv p38 --system-site-packages
+	python3 -m venv p312 --system-site-packages
 	pip install -U pip
 	pip install --upgrade -r requirements.txt
 
