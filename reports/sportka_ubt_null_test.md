@@ -27,7 +27,7 @@ This is an evaluation-only experiment.
 | Train (70%) | 559 |
 | Test (15%) | 119 |
 | Split | Walk-forward (chronological) |
-| Bootstrap resamples | 1000 |
+| Bootstrap resamples | 1,000 |
 
 ---
 
@@ -45,7 +45,7 @@ This is an evaluation-only experiment.
 
 ---
 
-## Bootstrap Confidence Intervals (95%, 1 000 resamples)
+## Bootstrap Confidence Intervals (95%, 1,000 resamples)
 
 ### real
 

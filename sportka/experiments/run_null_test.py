@@ -11,7 +11,7 @@ Experiments:
   4. Reversed data — chronological order reversed (future predicts past)
 
 For each condition the same UBT model and feature set are used without any
-tuning.  Bootstrap CIs (1 000 resamples) and delta comparisons are computed.
+tuning.  Bootstrap CIs (1,000 resamples) and delta comparisons are computed.
 
 Decision rule:
   - If UBT performs similarly on real and random/shuffled/reversed data
@@ -399,7 +399,7 @@ def _write_report(
     a(f"| Train (70%) | {results['real']['n_train']} |")
     a(f"| Test (15%) | {results['real']['n_test']} |")
     a(f"| Split | Walk-forward (chronological) |")
-    a(f"| Bootstrap resamples | {N_BOOTSTRAP} |")
+    a(f"| Bootstrap resamples | {N_BOOTSTRAP:,} |")
     a("")
     a("---")
     a("")
@@ -419,7 +419,7 @@ def _write_report(
     a("")
     a("---")
     a("")
-    a("## Bootstrap Confidence Intervals (95%, 1 000 resamples)")
+    a("## Bootstrap Confidence Intervals (95%, 1,000 resamples)")
     a("")
     for cond in ["real", "shuffled", "random", "reversed"]:
         ci = results[cond]["ci"]
