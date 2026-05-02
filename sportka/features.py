@@ -250,6 +250,8 @@ def theta_features(df: pd.DataFrame) -> np.ndarray:
     vector with the theta weights (capturing the 'theta-weighted' draw).
 
     Returns (n, 98) array  — marked experimental.
+      [:49]  theta_vals[k] if number k+1 was drawn, else 0  (drawn-number projection)
+      [49:]  theta_vals[k] if number k+1 was NOT drawn, else 0  (complement projection)
     """
     theta_vals = _get_theta_values()  # (49,)
     n = len(df)
@@ -258,11 +260,10 @@ def theta_features(df: pd.DataFrame) -> np.ndarray:
         binary = np.zeros(49, dtype=np.float32)
         for num in nums:
             binary[num - 1] = 1.0
-        # theta activation (drawn numbers' theta weights)
+        # theta projection of drawn numbers
         out[i, :49] = binary * theta_vals
-        # theta presence (1 if drawn and theta-weighted, else 0)
-        out[i, 49:] = binary * theta_vals
-    # Second half is redundant unless we add more structure; keep for extensibility
+        # theta projection of non-drawn numbers (complement)
+        out[i, 49:] = (1.0 - binary) * theta_vals
     return out
 
 

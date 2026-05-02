@@ -48,7 +48,7 @@ history.  All models are compared against strong random baselines.
 | rolling_frequency | base_winding | 356 | 2.5961 | 0.1092 | 0.2077 | 14.1490 | 0.7647 |
 | logistic_reg | base_time | 62 | 0.4265 | 0.1381 | 0.2113 | 0.0971 | 0.9664 |
 | mlp_small | base_winding | 356 | 0.6557 | 0.1224 | 0.1969 | 1.4820 | 0.8571 |
-| ubt_mlp | ubt_full | 566 | 1.1163 | 0.1164 | 0.1993 | 4.2578 | 0.8151 |
+| ubt_mlp | ubt_full | 566 | 1.1082 | 0.1236 | 0.2209 | 4.2414 | 0.8655 |
 
 **Metrics:**
 - `bce`: binary cross-entropy (lower = better)
@@ -89,12 +89,12 @@ Test-set metrics for selected models with 95% bootstrap CIs:
 
 | Metric | Estimate [95% CI] |
 |--------|-------------------|
-| bce | 1.1163 [1.0741, 1.1594] |
-| recall_at_6 | 0.1164 [0.0948, 0.1369] |
-| recall_at_10 | 0.1993 [0.1741, 0.2245] |
-| kl_vs_uniform | 4.2578 [4.1450, 4.3738] |
-| avg_hits_6 | 0.8151 [0.6639, 0.9582] |
-| avg_hits_10 | 1.3950 [1.2185, 1.5714] |
+| bce | 1.1082 [1.0642, 1.1525] |
+| recall_at_6 | 0.1236 [0.1032, 0.1441] |
+| recall_at_10 | 0.2209 [0.1944, 0.2485] |
+| kl_vs_uniform | 4.2414 [4.1164, 4.3652] |
+| avg_hits_6 | 0.8655 [0.7227, 1.0084] |
+| avg_hits_10 | 1.5462 [1.3611, 1.7395] |
 
 ---
 
@@ -108,12 +108,12 @@ If the model truly learns, it should perform no better than random here.
 
 | Metric | Value |
 |--------|-------|
-| bce | 1.1078 |
-| recall_at_6 | 0.1261 |
-| recall_at_10 | 0.2029 |
-| kl_vs_uniform | 4.2132 |
-| avg_hits_6 | 0.8824 |
-| avg_hits_10 | 1.4202 |
+| bce | 1.1077 |
+| recall_at_6 | 0.1188 |
+| recall_at_10 | 0.2017 |
+| kl_vs_uniform | 4.2026 |
+| avg_hits_6 | 0.8319 |
+| avg_hits_10 | 1.4118 |
 
 ### Reversed-time test
 Data is reversed chronologically (future predicts past).
@@ -121,12 +121,12 @@ A causal model should perform worse; similar performance implies no temporal sig
 
 | Metric | Value |
 |--------|-------|
-| bce | 1.1486 |
-| recall_at_6 | 0.1333 |
-| recall_at_10 | 0.2161 |
-| kl_vs_uniform | 4.5606 |
-| avg_hits_6 | 0.9328 |
-| avg_hits_10 | 1.5126 |
+| bce | 1.1371 |
+| recall_at_6 | 0.1345 |
+| recall_at_10 | 0.2173 |
+| kl_vs_uniform | 4.4832 |
+| avg_hits_6 | 0.9412 |
+| avg_hits_10 | 1.5210 |
 
 ---
 
@@ -149,12 +149,12 @@ A causal model should perform worse; similar performance implies no temporal sig
 **How to read the results:**
 - If `recall_at_6` for UBT/ML models is *within* the bootstrap CI of the random
   baseline, we cannot reject the null hypothesis.
-- The expected recall@6 under the null (uniform) is `6/49 ≈ 0.0857` per number
-  drawn, or equivalently `7 * (6/49) / 7 = 6/49 ≈ 0.857` of drawn numbers
-  recovered if 6 are predicted.  A fairer baseline is `6 * 7 / 49 ≈ 0.857`.
+- Under the null (uniform random) with 7 drawn numbers and top-6 predictions:
+  `E[hits] = 7 × 6/49 = 42/49 ≈ 0.8571`, so
+  `recall@6 = E[hits] / 7 = 6/49 ≈ 0.1224`.
 
 - Random baseline recall@6: **0.1224** (95% CI [0.1020, 0.1429])
-- UBT model recall@6:       **0.1164** (95% CI [0.0948, 0.1369])
+- UBT model recall@6:       **0.1236** (95% CI [0.1032, 0.1441])
 
 ✅  The UBT model's performance is **within** the random baseline CI.
     We **cannot** reject the null hypothesis.  No statistically significant

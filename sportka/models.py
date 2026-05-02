@@ -90,12 +90,12 @@ class RollingFreqPredictor(BaseModel):
 
     name = "rolling_frequency"
 
-    def __init__(self, window_feature_offset: int = 49 + 13):
+    def __init__(self, rolling_freq_feature_index: int = 49 + 13):
         """
-        window_feature_offset: index of the first rolling-window-1 feature
+        rolling_freq_feature_index: index of the first rolling-window-1 feature
         in the combined feature matrix (after base + time features = 49+13=62).
         """
-        self._offset = window_feature_offset
+        self._offset = rolling_freq_feature_index
         self._global_freq: Optional[np.ndarray] = None
 
     def fit(self, X_train: np.ndarray, Y_train: np.ndarray) -> "RollingFreqPredictor":
