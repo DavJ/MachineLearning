@@ -33,6 +33,12 @@ from typing import Tuple
 
 from sportka.models import BaseModel
 
+try:
+    from sklearn.neural_network import MLPClassifier
+    SKLEARN_AVAILABLE = True
+except ImportError:
+    SKLEARN_AVAILABLE = False
+
 
 # ---------------------------------------------------------------------------
 # Shared helpers
@@ -104,8 +110,10 @@ class UBTMLPV2(BaseModel):
         self._random_state = random_state
         self._models: list = []
 
-    def fit(self, X_train: np.ndarray, Y_train: np.ndarray) -> "UBTMLPV2":
-        from sklearn.neural_network import MLPClassifier
+    def fit(self, X_train: np.ndarray, Y_train: np.ndarray) -> "UBTMLPV2 | None":
+        if not SKLEARN_AVAILABLE:
+            print("⚠️ sklearn not available — skipping MLP model")
+            return None
 
         Xf = _flatten4d(X_train)
         self._models = []
@@ -212,8 +220,10 @@ class UBTCNNv2(BaseModel):
 
         return layer2.reshape(n, -1)  # (n, nf2 * 49)
 
-    def fit(self, X_train: np.ndarray, Y_train: np.ndarray) -> "UBTCNNv2":
-        from sklearn.neural_network import MLPClassifier
+    def fit(self, X_train: np.ndarray, Y_train: np.ndarray) -> "UBTCNNv2 | None":
+        if not SKLEARN_AVAILABLE:
+            print("⚠️ sklearn not available — skipping MLP model")
+            return None
 
         Xf = self._extract_features(X_train)
         self._models = []
