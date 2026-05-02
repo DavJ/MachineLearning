@@ -165,7 +165,55 @@ any claim of predictive power can be made.
 
 ---
 
-## Constraints and Caveats
+## Validation after Fixes
+
+The following checks were performed after applying the v4 fixes.
+
+### Probability Scaling
+
+| Check | Result |
+|-------|--------|
+| `GlobalFreqPredictor` output sum over 49 numbers | ≈ 7.0 ✅ |
+| `RandomPredictor` output sum | 7.0 (exact) ✅ |
+| `assert_probability_scale` helper added to `evaluation.py` | ✅ |
+
+Fix applied: `freq / total` → `freq / n_draws` so each value represents
+P(number appears in a draw).  Sum over 49 numbers = 7 as expected.
+
+### Data Leakage Removed
+
+`sportka/walk_forward.py` introduces `build_walk_forward_features()` which
+builds the feature for row *i* using only rows `0…i-1`.  Tests in
+`tests/test_no_leakage.py` verify that no future data is visible.
+
+### Feature Offsets
+
+`sportka/feature_layout.py` provides `compute_feature_layout()`, which
+replaces hardcoded offsets such as `49 + 13`.  `RollingFreqPredictor` now
+derives its winding-block offset from this layout automatically.
+
+### Baselines After Fix
+
+With correct probability scaling:
+- **random baseline** `avg_hits_6` ≈ 0.857  (= 7 × 6/49)
+- **frequency baseline** should match random on null (synthetic) data
+
+### Pipeline Without sklearn
+
+`SKLEARN_AVAILABLE` flag in `models.py` ensures `MLPModel` and its subclasses
+degrade gracefully when scikit-learn is not installed: `fit()` is a no-op and
+`predict_proba()` returns the uniform baseline.
+
+### Reproducible Make Targets
+
+| Target | Command |
+|--------|---------|
+| `make install` | installs all Python dependencies |
+| `make test` | runs `pytest tests/` |
+| `make run` | runs the experiment on synthetic data |
+| `make run-real` | runs the experiment on a real CSV file |
+| `make clean` | removes `__pycache__` directories |
+
 
 - No predictive power is claimed without statistical significance.
 - Theta features are marked **experimental** and lack theoretical justification

@@ -25,6 +25,26 @@ from sportka.features import build_features, walk_forward_split
 EPS = 1e-9  # numerical stability
 
 
+def assert_probability_scale(p: np.ndarray) -> None:
+    """
+    Assert that a 49-element probability vector has the expected sum (~7).
+
+    Each element should represent P(number appears in a draw).  Since exactly
+    7 numbers are drawn each time, the sum over all 49 numbers must be ≈ 7.
+
+    Args:
+        p: 1-D array of length 49 (or 2-D (n, 49) where the row mean is checked).
+    Raises:
+        AssertionError if the sum is outside [6.0, 8.0].
+    """
+    arr = np.asarray(p, dtype=np.float64)
+    if arr.ndim == 2:
+        s = float(arr.mean(axis=0).sum())
+    else:
+        s = float(arr.sum())
+    assert 6.0 < s < 8.0, f"Probability sum out of range: {s:.4f} (expected ~7)"
+
+
 def binary_cross_entropy(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     """
     Mean binary cross-entropy over all (draw, number) pairs.
