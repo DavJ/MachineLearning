@@ -1,0 +1,296 @@
+{
+  "checked_on": "2026-10-22",
+  "source_url": "https://www.allwyn.cz/loterie/historie-cisel?game=sportka",
+  "rules_url": "https://www.allwyn.cz/loterie/sportka/jak-hrat",
+  "environment": {
+    "numpy": "2.3.5",
+    "pandas": "2.2.3",
+    "scikit-learn": "1.8.0"
+  },
+  "protocol": "Fixed 70/15/15 chronological split for each draw; one-step-ahead observed history; no test-set model selection.",
+  "limitation": "Descriptive held-out scores, not a significance test, a profitability estimate or proof of prediction skill.",
+  "games": {
+    "1": {
+      "notice": "Fair independent draws cannot be predicted from past results. These tickets have no demonstrated predictive edge. Jackpot odds below exclude \u0160ance and Superjackpot.",
+      "source": {
+        "kind": "csv",
+        "sha256": "631ecac60a8884a96a5331675972edc336f07e826c72eea207f66edc8442d5d6",
+        "game": 1
+      },
+      "draw_count": 3821,
+      "date_range": [
+        "1994-01-09",
+        "2026-10-21"
+      ],
+      "split_pairs": {
+        "train": 2673,
+        "validation": 573,
+        "test": 574
+      },
+      "expected_random_hits_per_line": 0.7346938775510204,
+      "expected_random_jackpot_rate": 7.151123842018516e-08,
+      "selection": "Fixed models; no test-set tuning or automatic betting recommendation",
+      "tie_policy": "Equal probability scores use a fixed numerical ordering for top-k metrics",
+      "profit": "Not estimated: actual payouts, costs, and jackpot sharing are not supplied",
+      "results": {
+        "random_uniform": {
+          "validation": {
+            "bce": 0.37177617994345286,
+            "brier": 0.10745521634817123,
+            "recall_at_6": 0.11721931355439207,
+            "recall_at_10": 0.19575334496800464,
+            "kl_vs_uniform": 0.0,
+            "avg_hits_6": 0.7033158813263525,
+            "avg_hits_10": 1.174520069808028,
+            "ticket_3plus_rate": 0.017452006980802792,
+            "ticket_4plus_rate": 0.0,
+            "ticket_5plus_rate": 0.0,
+            "ticket_6_rate": 0.0
+          },
+          "test": {
+            "bce": 0.3717761799434529,
+            "brier": 0.10745522379875183,
+            "recall_at_6": 0.12717770034843207,
+            "recall_at_10": 0.21022067363530778,
+            "kl_vs_uniform": 0.0,
+            "avg_hits_6": 0.7630662020905923,
+            "avg_hits_10": 1.2613240418118468,
+            "ticket_3plus_rate": 0.012195121951219513,
+            "ticket_4plus_rate": 0.0,
+            "ticket_5plus_rate": 0.0,
+            "ticket_6_rate": 0.0
+          },
+          "test_bce_minus_uniform": 0.0
+        },
+        "global_frequency": {
+          "validation": {
+            "bce": 0.37182497820788873,
+            "brier": 0.10746559500694275,
+            "recall_at_6": 0.12507271669575332,
+            "recall_at_10": 0.21465968586387435,
+            "kl_vs_uniform": 0.0013269638890596074,
+            "avg_hits_6": 0.7504363001745201,
+            "avg_hits_10": 1.287958115183246,
+            "ticket_3plus_rate": 0.019197207678883072,
+            "ticket_4plus_rate": 0.0017452006980802793,
+            "ticket_5plus_rate": 0.0,
+            "ticket_6_rate": 0.0
+          },
+          "test": {
+            "bce": 0.3721006598987902,
+            "brier": 0.10752328485250473,
+            "recall_at_6": 0.12775842044134728,
+            "recall_at_10": 0.19947735191637628,
+            "kl_vs_uniform": 0.0013269638890596074,
+            "avg_hits_6": 0.7665505226480837,
+            "avg_hits_10": 1.1968641114982579,
+            "ticket_3plus_rate": 0.036585365853658534,
+            "ticket_4plus_rate": 0.0,
+            "ticket_5plus_rate": 0.0,
+            "ticket_6_rate": 0.0
+          },
+          "test_bce_minus_uniform": 0.0003244799553372979
+        },
+        "rolling_frequency": {
+          "validation": {
+            "bce": 4.4550925205400995,
+            "brier": 0.21498022973537445,
+            "recall_at_6": 0.12216404886561955,
+            "recall_at_10": 0.20040721349621873,
+            "kl_vs_uniform": 16.085662259686046,
+            "avg_hits_6": 0.7329842931937173,
+            "avg_hits_10": 1.2024432809773125,
+            "ticket_3plus_rate": 0.02443280977312391,
+            "ticket_4plus_rate": 0.0017452006980802793,
+            "ticket_5plus_rate": 0.0,
+            "ticket_6_rate": 0.0
+          },
+          "test": {
+            "bce": 4.417858994000209,
+            "brier": 0.21318353712558746,
+            "recall_at_6": 0.1295005807200929,
+            "recall_at_10": 0.21022067363530778,
+            "kl_vs_uniform": 16.085662259686046,
+            "avg_hits_6": 0.7770034843205574,
+            "avg_hits_10": 1.2613240418118468,
+            "ticket_3plus_rate": 0.02264808362369338,
+            "ticket_4plus_rate": 0.0,
+            "ticket_5plus_rate": 0.0,
+            "ticket_6_rate": 0.0
+          },
+          "test_bce_minus_uniform": 4.046082814056756
+        },
+        "logistic_regression": {
+          "validation": {
+            "bce": 0.383659176439318,
+            "brier": 0.11010481417179108,
+            "recall_at_6": 0.11925538103548573,
+            "recall_at_10": 0.20506108202443282,
+            "kl_vs_uniform": 0.08585579114905004,
+            "avg_hits_6": 0.7155322862129145,
+            "avg_hits_10": 1.2303664921465969,
+            "ticket_3plus_rate": 0.017452006980802792,
+            "ticket_4plus_rate": 0.0,
+            "ticket_5plus_rate": 0.0,
+            "ticket_6_rate": 0.0
+          },
+          "test": {
+            "bce": 0.38256820810309317,
+            "brier": 0.1099003478884697,
+            "recall_at_6": 0.12369337979094076,
+            "recall_at_10": 0.20586527293844364,
+            "kl_vs_uniform": 0.08864242727915075,
+            "avg_hits_6": 0.7421602787456446,
+            "avg_hits_10": 1.235191637630662,
+            "ticket_3plus_rate": 0.020905923344947737,
+            "ticket_4plus_rate": 0.0,
+            "ticket_5plus_rate": 0.0,
+            "ticket_6_rate": 0.0
+          },
+          "test_bce_minus_uniform": 0.010792028159640255
+        }
+      }
+    },
+    "2": {
+      "notice": "Fair independent draws cannot be predicted from past results. These tickets have no demonstrated predictive edge. Jackpot odds below exclude \u0160ance and Superjackpot.",
+      "source": {
+        "kind": "csv",
+        "sha256": "631ecac60a8884a96a5331675972edc336f07e826c72eea207f66edc8442d5d6",
+        "game": 2
+      },
+      "draw_count": 3821,
+      "date_range": [
+        "1994-01-09",
+        "2026-10-21"
+      ],
+      "split_pairs": {
+        "train": 2673,
+        "validation": 573,
+        "test": 574
+      },
+      "expected_random_hits_per_line": 0.7346938775510204,
+      "expected_random_jackpot_rate": 7.151123842018516e-08,
+      "selection": "Fixed models; no test-set tuning or automatic betting recommendation",
+      "tie_policy": "Equal probability scores use a fixed numerical ordering for top-k metrics",
+      "profit": "Not estimated: actual payouts, costs, and jackpot sharing are not supplied",
+      "results": {
+        "random_uniform": {
+          "validation": {
+            "bce": 0.3717761799434528,
+            "brier": 0.10745521634817123,
+            "recall_at_6": 0.1227457824316463,
+            "recall_at_10": 0.21058755090168702,
+            "kl_vs_uniform": 0.0,
+            "avg_hits_6": 0.7364746945898778,
+            "avg_hits_10": 1.263525305410122,
+            "ticket_3plus_rate": 0.015706806282722512,
+            "ticket_4plus_rate": 0.0017452006980802793,
+            "ticket_5plus_rate": 0.0,
+            "ticket_6_rate": 0.0
+          },
+          "test": {
+            "bce": 0.3717761799434529,
+            "brier": 0.10745522379875183,
+            "recall_at_6": 0.12630662020905922,
+            "recall_at_10": 0.2078977932636469,
+            "kl_vs_uniform": 0.0,
+            "avg_hits_6": 0.7578397212543554,
+            "avg_hits_10": 1.2473867595818815,
+            "ticket_3plus_rate": 0.024390243902439025,
+            "ticket_4plus_rate": 0.0,
+            "ticket_5plus_rate": 0.0,
+            "ticket_6_rate": 0.0
+          },
+          "test_bce_minus_uniform": 0.0
+        },
+        "global_frequency": {
+          "validation": {
+            "bce": 0.3719436119540484,
+            "brier": 0.10749124735593796,
+            "recall_at_6": 0.12274578243164633,
+            "recall_at_10": 0.20360674810936588,
+            "kl_vs_uniform": 0.0015825316879501633,
+            "avg_hits_6": 0.7364746945898778,
+            "avg_hits_10": 1.2216404886561956,
+            "ticket_3plus_rate": 0.02617801047120419,
+            "ticket_4plus_rate": 0.0,
+            "ticket_5plus_rate": 0.0,
+            "ticket_6_rate": 0.0
+          },
+          "test": {
+            "bce": 0.3721241192438865,
+            "brier": 0.10752925276756287,
+            "recall_at_6": 0.12398373983739835,
+            "recall_at_10": 0.2035423925667828,
+            "kl_vs_uniform": 0.0015825316879501633,
+            "avg_hits_6": 0.7439024390243902,
+            "avg_hits_10": 1.221254355400697,
+            "ticket_3plus_rate": 0.02613240418118467,
+            "ticket_4plus_rate": 0.0,
+            "ticket_5plus_rate": 0.0,
+            "ticket_6_rate": 0.0
+          },
+          "test_bce_minus_uniform": 0.00034793930043358623
+        },
+        "rolling_frequency": {
+          "validation": {
+            "bce": 4.474282779901936,
+            "brier": 0.2159062623977661,
+            "recall_at_6": 0.1183827806864456,
+            "recall_at_10": 0.20011634671320533,
+            "kl_vs_uniform": 16.085662259686046,
+            "avg_hits_6": 0.7102966841186736,
+            "avg_hits_10": 1.2006980802792322,
+            "ticket_3plus_rate": 0.02617801047120419,
+            "ticket_4plus_rate": 0.0,
+            "ticket_5plus_rate": 0.0,
+            "ticket_6_rate": 0.0
+          },
+          "test": {
+            "bce": 4.448804637380131,
+            "brier": 0.21467681229114532,
+            "recall_at_6": 0.12340301974448314,
+            "recall_at_10": 0.2070267131242741,
+            "kl_vs_uniform": 16.085662259686046,
+            "avg_hits_6": 0.740418118466899,
+            "avg_hits_10": 1.2421602787456445,
+            "ticket_3plus_rate": 0.017421602787456445,
+            "ticket_4plus_rate": 0.0,
+            "ticket_5plus_rate": 0.0,
+            "ticket_6_rate": 0.0
+          },
+          "test_bce_minus_uniform": 4.077028457436678
+        },
+        "logistic_regression": {
+          "validation": {
+            "bce": 0.3842032467864779,
+            "brier": 0.11012990027666092,
+            "recall_at_6": 0.12245491564863294,
+            "recall_at_10": 0.20680628272251306,
+            "kl_vs_uniform": 0.08919283729390562,
+            "avg_hits_6": 0.7347294938917975,
+            "avg_hits_10": 1.2408376963350785,
+            "ticket_3plus_rate": 0.017452006980802792,
+            "ticket_4plus_rate": 0.0034904013961605585,
+            "ticket_5plus_rate": 0.0,
+            "ticket_6_rate": 0.0
+          },
+          "test": {
+            "bce": 0.3848467744417652,
+            "brier": 0.11039967089891434,
+            "recall_at_6": 0.11933797909407666,
+            "recall_at_10": 0.19860627177700346,
+            "kl_vs_uniform": 0.09229787118035138,
+            "avg_hits_6": 0.7160278745644599,
+            "avg_hits_10": 1.1916376306620209,
+            "ticket_3plus_rate": 0.010452961672473868,
+            "ticket_4plus_rate": 0.0017421602787456446,
+            "ticket_5plus_rate": 0.0017421602787456446,
+            "ticket_6_rate": 0.0
+          },
+          "test_bce_minus_uniform": 0.013070594498312271
+        }
+      }
+    }
+  }
+}

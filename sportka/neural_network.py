@@ -16,13 +16,8 @@ from datetime import datetime
 from typing import Optional, Tuple, Callable, Dict, Any
 
 
-# Enable M1 optimization
-try:
-    # Use Metal Performance Shaders on M1 Mac
-    tf.config.set_visible_devices([], 'GPU')  # Let TensorFlow auto-detect
-except RuntimeError as e:
-    # GPU configuration may fail if not available
-    pass
+# Leave device visibility unchanged so TensorFlow can use an installed GPU
+# backend (including tensorflow-metal). Importing must not disable GPUs.
 
 
 class SportkaPredictor:
@@ -34,7 +29,7 @@ class SportkaPredictor:
     def __init__(
         self,
         input_dim: int = 103,
-        hidden_layers: int = 64,
+        hidden_layers: int = 2,
         hidden_units: int = 128,
         dropout_rate: float = 0.3,
         model_dir: str = './models'
@@ -124,7 +119,7 @@ class SportkaPredictor:
         
         model.compile(
             optimizer=optimizer,
-            loss='mse',
+            loss='binary_crossentropy',
             metrics=['mae', 'mse']
         )
         
@@ -159,8 +154,7 @@ class SportkaPredictor:
         if self.model is None:
             self.build_model()
         
-        if callbacks is None:
-            callbacks = []
+        callbacks = list(callbacks or [])
         
         # Add early stopping
         early_stopping = tf.keras.callbacks.EarlyStopping(
@@ -188,6 +182,7 @@ class SportkaPredictor:
             batch_size=batch_size,
             validation_split=validation_split,
             callbacks=callbacks,
+            shuffle=False,
             verbose=verbose
         )
         
@@ -235,6 +230,7 @@ class SportkaPredictor:
         
         # Save metadata
         metadata = {
+            'label_semantics': 'six_main_numbers_v1',
             'input_dim': self.input_dim,
             'hidden_layers': self.hidden_layers,
             'hidden_units': self.hidden_units,
@@ -266,6 +262,8 @@ class SportkaPredictor:
         if os.path.exists(metadata_path):
             with open(metadata_path, 'r') as f:
                 metadata = json.load(f)
+            if metadata.get('label_semantics') != 'six_main_numbers_v1':
+                raise ValueError("Legacy weights include bonus/normalised targets; retrain with six main numbers")
             
             # Update parameters from metadata
             self.input_dim = metadata.get('input_dim', self.input_dim)
@@ -274,9 +272,11 @@ class SportkaPredictor:
             self.dropout_rate = metadata.get('dropout_rate', self.dropout_rate)
             self.training_history = metadata.get('training_history', [])
         
-        # Build model with loaded parameters
-        if self.model is None:
-            self.build_model()
+        else:
+            raise ValueError("Missing label-semantics metadata; retrain this model")
+
+        # A previously built instance may have a different architecture.
+        self.build_model()
         
         # Load weights
         self.model.load_weights(weights_path)
@@ -300,7 +300,7 @@ class SportkaPredictor:
         
         return sorted(models, reverse=True)  # Most recent first
     
-    def get_best_numbers(self, predictions: np.ndarray, n: int = 7) -> list:
+    def get_best_numbers(self, predictions: np.ndarray, n: int = 6) -> list:
         """
         Extract best N numbers from predictions.
         
@@ -349,12 +349,12 @@ def create_training_data_with_biquaternion(draws, use_biquaternion: bool = True)
         
         if use_biquaternion:
             # Apply biquaternion transformation to history
-            # Extract top 7 numbers from probability distribution
-            top_numbers_1 = np.argsort(hist1)[-7:] + 1
-            top_numbers_2 = np.argsort(hist2)[-7:] + 1
+            # The first row has no prior draw, so use zero transform features.
+            top_numbers_1 = draws[draw.index - 1].first if draw.index else None
+            top_numbers_2 = draws[draw.index - 1].second if draw.index else None
             
-            bq_features_1 = apply_biquaternion_theta_transform(top_numbers_1.tolist())
-            bq_features_2 = apply_biquaternion_theta_transform(top_numbers_2.tolist())
+            bq_features_1 = apply_biquaternion_theta_transform(top_numbers_1) if top_numbers_1 else np.zeros(24)
+            bq_features_2 = apply_biquaternion_theta_transform(top_numbers_2) if top_numbers_2 else np.zeros(24)
             
             # Combine all features
             combined_features = np.concatenate([

@@ -2,8 +2,8 @@
 Tests for probability scaling correctness.
 
 Each number's probability must represent P(number appears in a draw).
-The sum over all 49 numbers must therefore be approximately 7
-(since exactly 7 numbers are drawn each time).
+The sum over all 49 numbers must therefore be approximately 6
+(since exactly 6 numbers are drawn each time).
 """
 
 import numpy as np
@@ -11,16 +11,16 @@ import pytest
 
 
 def test_probability_sum_uniform():
-    """Uniform probability 7/49 per number sums to 7."""
-    p = np.ones(49) * (7 / 49)
-    assert 6.5 < p.sum() < 7.5
+    """Uniform probability 6/49 per number sums to 6."""
+    p = np.ones(49) * (6 / 49)
+    assert 5.5 < p.sum() < 6.5
 
 
 def test_assert_probability_scale_passes():
     """assert_probability_scale should not raise for a valid vector."""
     from sportka.evaluation import assert_probability_scale
 
-    p = np.ones(49) * (7 / 49)
+    p = np.ones(49) * (6 / 49)
     assert_probability_scale(p)  # must not raise
 
 
@@ -34,14 +34,14 @@ def test_assert_probability_scale_fails_on_softmax():
 
 
 def test_global_freq_predictor_sum():
-    """GlobalFreqPredictor predictions must sum to ~7 over the 49 numbers."""
+    """GlobalFreqPredictor predictions must sum to ~6 over the 49 numbers."""
     from sportka.models import GlobalFreqPredictor
 
     rng = np.random.default_rng(0)
-    # Simulate 200 draws: binary matrix (n, 49), exactly 7 ones per row
+    # Simulate 200 draws: binary matrix (n, 49), exactly 6 ones per row
     Y = np.zeros((200, 49), dtype=np.float32)
     for i in range(200):
-        chosen = rng.choice(49, size=7, replace=False)
+        chosen = rng.choice(49, size=6, replace=False)
         Y[i, chosen] = 1.0
     X_dummy = np.zeros((200, 1), dtype=np.float32)
 
@@ -50,5 +50,5 @@ def test_global_freq_predictor_sum():
     pred = model.predict_proba(np.zeros((10, 1), dtype=np.float32))
 
     row_sums = pred.sum(axis=1)
-    assert np.all(row_sums > 6.5), f"Row sums too low: {row_sums}"
-    assert np.all(row_sums < 7.5), f"Row sums too high: {row_sums}"
+    assert np.all(row_sums > 5.5), f"Row sums too low: {row_sums}"
+    assert np.all(row_sums < 6.5), f"Row sums too high: {row_sums}"

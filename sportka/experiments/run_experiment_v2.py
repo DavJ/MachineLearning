@@ -62,6 +62,8 @@ from sportka.multiscale_features import build_multiscale_tensors, flatten_multis
 from sportka.model import UBTMLPV2, UBTCNNv2
 from sportka.evaluation import (
     _binary_matrix,
+    temporal_feature_split,
+    split_aligned_arrays,
     compute_all_metrics,
     bootstrap_ci_all_metrics,
     shuffled_labels_test,
@@ -166,15 +168,12 @@ def run_experiment(
     # 1. Load data
     # ------------------------------------------------------------------
     print("\n[1/6] Loading data …")
-    if csv_path and os.path.exists(csv_path):
+    if csv_path:
         df = load_sportka_csv(csv_path)
         data_source = f"CSV file: {csv_path}"
         print(f"  Loaded {len(df)} draws from {csv_path}")
     else:
-        if csv_path:
-            print(f"  WARNING: {csv_path} not found — using synthetic random data.")
-        else:
-            print("  No CSV provided — using synthetic random data (null hypothesis).")
+        print("  No CSV provided — using synthetic random data (null hypothesis).")
         df = generate_synthetic_data(n_draws=800, seed=seed)
         data_source = "Synthetic random draws (null hypothesis)"
         print(f"  Generated {len(df)} synthetic draws.")
@@ -192,18 +191,18 @@ def run_experiment(
         f"include_raw={MS_INCLUDE_RAW}  →  {n_channels} channels × 49 = {n_channels * 49} features"
     )
 
-    X_tr_t, Y_tr = _align_v2_xy(train_df)
-    X_vl_t, Y_vl = _align_v2_xy(val_df)
-    X_te_t, Y_te = _align_v2_xy(test_df)
+    X_tr_t, Y_tr, X_vl_t, Y_vl, X_te_t, Y_te = split_aligned_arrays(
+        df, _build_v2_features(df), _binary_matrix(df), TRAIN_FRAC, VAL_FRAC
+    )
 
     X_tr_f = flatten_multiscale_tensors(X_tr_t)
     X_vl_f = flatten_multiscale_tensors(X_vl_t)
     X_te_f = flatten_multiscale_tensors(X_te_t)
 
     # Baseline models use the same simple binary matrix
-    X_tr_raw, _ = _align_random_xy(train_df)
-    X_vl_raw, _ = _align_random_xy(val_df)
-    X_te_raw, _ = _align_random_xy(test_df)
+    X_tr_raw, _, X_vl_raw, _, X_te_raw, _ = split_aligned_arrays(
+        df, _binary_matrix(df), _binary_matrix(df), TRAIN_FRAC, VAL_FRAC
+    )
 
     print(f"  Tensor shape: {X_tr_t.shape}  →  flat: {X_tr_f.shape}")
 
@@ -303,8 +302,9 @@ def run_experiment(
         df_rev = df.iloc[::-1].reset_index(drop=True)
         df_rev["draw_index"] = np.arange(len(df_rev))
         tr_r, vl_r, te_r = walk_forward_split(df_rev, TRAIN_FRAC, VAL_FRAC)
-        Xtr_r, Ytr_r = _align_v2_xy(tr_r)
-        Xte_r, Yte_r = _align_v2_xy(te_r)
+        Xtr_r, Ytr_r, _, _, Xte_r, Yte_r = split_aligned_arrays(
+            df_rev, _build_v2_features(df_rev), _binary_matrix(df_rev), TRAIN_FRAC, VAL_FRAC
+        )
         m = deepcopy(model_)
         m.fit(Xtr_r, Ytr_r)
         return compute_all_metrics(Yte_r, m.predict_proba(Xte_r))
@@ -574,10 +574,9 @@ def _write_report(
     a("> non-random structure.")
     a("")
     a("**How to read the results:**")
-    a("- Under the null (uniform random, 7 drawn, top-6 selected):")
-    a("  `E[hits] = 7 × 6/49 ≈ 0.857`, so `recall@6 = 6/49 ≈ 0.1224`.")
-    a("- If the v2 model recall@6 falls within the random baseline CI, the null")
-    a("  hypothesis cannot be rejected.")
+    a("- Under the null (uniform random, six main numbers, top-6 selected):")
+    a("  `E[hits] = 6 × 6/49 ≈ 0.7347`, so `recall@6 = 6/49 ≈ 0.1224`.")
+    a("- Confidence intervals are descriptive, not a corrected test of prediction skill.")
     a("")
 
     rnd_r6 = results.get("random_uniform", {}).get("test", {}).get("recall_at_6", float("nan"))
@@ -590,16 +589,11 @@ def _write_report(
     a(f"- UBT v2 model recall@6:    **{_fmt(v2_r6)}** "
       f"(95% CI [{_fmt(v2_ci[1])}, {_fmt(v2_ci[2])}])")
 
-    outside_ci = v2_r6 > rnd_ci[2] or v2_r6 < rnd_ci[1]
-    if outside_ci:
-        a("")
-        a("⚠️  The v2 model's performance is **outside** the random baseline CI.")
-        a("    This is statistically unusual and requires independent data replication.")
+    if v2_ci[1] > max(rnd_ci[2], 6 / 49):
+        a("The model clears an exploratory favorable-interval screen. Replicate on")
+        a("untouched future data and correct for model selection before claiming an edge.")
     else:
-        a("")
-        a("✅  The v2 model's performance is **within** the random baseline CI.")
-        a("    We **cannot** reject the null hypothesis.  No statistically significant")
-        a("    predictive power has been demonstrated.")
+        a("This interval screen does not demonstrate an advantage over the baseline.")
     a("")
     a("**Conclusion:** Results must be replicated on independent real draw data before")
     a("any claim of predictive power can be made.  Theta features are marked")
@@ -617,7 +611,7 @@ def _write_report(
     a("- CNN filters are fixed random projections (random kitchen sinks),")
     a("  not back-propagated through the convolution layers.")
     a("- All models use scikit-learn and are intentionally small to avoid overfitting.")
-    a("- When run on synthetic data, all results trivially confirm the null hypothesis.")
+    a("- When run on synthetic data, chance fluctuations are expected; results do not establish an edge.")
     a("")
 
     with open(path, "w", encoding="utf-8") as f:

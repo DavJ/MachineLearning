@@ -1,13 +1,16 @@
 PYTHON=python3
 
-.PHONY: install test run null real clean
+.PHONY: install test run null real clean tickets
 
 install:
 	$(PYTHON) -m pip install --upgrade pip
-	$(PYTHON) -m pip install numpy pandas matplotlib scikit-learn pytest
+	$(PYTHON) -m pip install -r requirements-sportka.txt pytest
 
 test:
-	$(PYTHON) -m pytest tests
+	$(PYTHON) -m pytest
+
+tickets:
+	$(PYTHON) sportka_launcher.py tickets
 
 run:
 	$(PYTHON) sportka/experiments/run_experiment_v2.py

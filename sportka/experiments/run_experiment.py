@@ -58,6 +58,8 @@ from sportka.models import (
 )
 from sportka.evaluation import (
     _binary_matrix,
+    temporal_feature_split,
+    split_aligned_arrays,
     _align_xy,
     compute_all_metrics,
     walk_forward_eval,
@@ -132,15 +134,12 @@ def run_experiment(csv_path: str | None = None, seed: int = RANDOM_SEED) -> dict
     # 1. Load data
     # ------------------------------------------------------------------
     print("\n[1/6] Loading data …")
-    if csv_path and os.path.exists(csv_path):
+    if csv_path:
         df = load_sportka_csv(csv_path)
         data_source = f"CSV file: {csv_path}"
         print(f"  Loaded {len(df)} draws from {csv_path}")
     else:
-        if csv_path:
-            print(f"  WARNING: {csv_path} not found — using synthetic random data.")
-        else:
-            print("  No CSV provided — using synthetic random data (null hypothesis).")
+        print("  No CSV provided — using synthetic random data (null hypothesis).")
         df = generate_synthetic_data(n_draws=800, seed=seed)
         data_source = "Synthetic random draws (null hypothesis)"
         print(f"  Generated {len(df)} synthetic draws.")
@@ -154,9 +153,9 @@ def run_experiment(csv_path: str | None = None, seed: int = RANDOM_SEED) -> dict
     print("\n[2/6] Building feature matrices …")
     feat_matrices: Dict[str, Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]] = {}
     for cfg_name, groups in FEATURE_CONFIGS.items():
-        X_tr, Y_tr = _align_xy(train_df, groups)
-        X_vl, Y_vl = _align_xy(val_df,   groups)
-        X_te, Y_te = _align_xy(test_df,  groups)
+        X_tr, Y_tr, X_vl, Y_vl, X_te, Y_te = temporal_feature_split(
+            df, groups, TRAIN_FRAC, VAL_FRAC
+        )
         feat_matrices[cfg_name] = (X_tr, Y_tr, X_vl, Y_vl, X_te, Y_te)
         print(f"  {cfg_name:<20} → {X_tr.shape[1]} features  ({X_tr.shape[0]} train pairs)")
 
@@ -316,7 +315,7 @@ def _write_report(
     a("")
     a("## Overview")
     a("")
-    a("This report presents a rigorous, null-hypothesis-first evaluation of whether")
+    a("This report presents an exploratory, null-hypothesis-first evaluation of whether")
     a("UBT/theta-inspired features capture any non-random structure in Sportka draw")
     a("history.  All models are compared against strong random baselines.")
     a("")
@@ -447,11 +446,10 @@ def _write_report(
     a("> non-random structure.")
     a("")
     a("**How to read the results:**")
-    a("- If `recall_at_6` for UBT/ML models is *within* the bootstrap CI of the random")
-    a("  baseline, we cannot reject the null hypothesis.")
-    a("- Under the null (uniform random) with 7 drawn numbers and top-6 predictions:")
-    a("  `E[hits] = 7 × 6/49 = 42/49 ≈ 0.8571`, so")
-    a("  `recall@6 = E[hits] / 7 = 6/49 ≈ 0.1224`.")
+    a("- Confidence intervals are descriptive, not a corrected test of prediction skill.")
+    a("- Under the null (uniform random) with six main numbers and top-6 predictions:")
+    a("  `E[hits] = 6 × 6/49 = 36/49 ≈ 0.7347`, so")
+    a("  `recall@6 = E[hits] / 6 = 6/49 ≈ 0.1224`.")
     a("")
     ubt_test = results.get("ubt_mlp", {}).get("test", {})
     rnd_test = results.get("random_uniform", {}).get("test", {})
@@ -465,19 +463,11 @@ def _write_report(
     a(f"- UBT model recall@6:       **{_fmt(ubt_r6)}** "
       f"(95% CI [{_fmt(ubt_ci[1])}, {_fmt(ubt_ci[2])}])")
 
-    significant = (
-        ubt_r6 > rnd_ci[2] or ubt_r6 < rnd_ci[1]
-    )
-    if significant:
-        a("")
-        a("⚠️  The UBT model's performance is **outside** the random baseline CI.")
-        a("    This is a *statistically unusual* result and warrants further")
-        a("    investigation with independent data before any claims are made.")
+    if ubt_ci[1] > max(rnd_ci[2], 6 / 49):
+        a("The model clears an exploratory favorable-interval screen. Replicate on")
+        a("untouched future data and correct for model selection before claiming an edge.")
     else:
-        a("")
-        a("✅  The UBT model's performance is **within** the random baseline CI.")
-        a("    We **cannot** reject the null hypothesis.  No statistically significant")
-        a("    predictive power has been demonstrated.")
+        a("This interval screen does not demonstrate an advantage over the baseline.")
     a("")
     a("**Conclusion:** Results must be replicated on independent real draw data before")
     a("any claim of predictive power can be made.")
@@ -492,7 +482,7 @@ def _write_report(
     a("- Torus embedding is a deterministic projection that may encode number")
     a("  proximity artefacts without capturing true lottery structure.")
     a("- All models use scikit-learn and are intentionally small to avoid overfitting.")
-    a("- If run on synthetic data, all results trivially confirm the null hypothesis.")
+    a("- If run on synthetic data, chance fluctuations are expected; results do not establish an edge.")
     a("")
 
     with open(path, "w", encoding="utf-8") as f:

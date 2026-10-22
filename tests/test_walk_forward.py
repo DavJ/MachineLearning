@@ -71,7 +71,7 @@ def test_align_xy_temporal_shift():
     rows = []
     for i in range(5):
         date = datetime.date(2020, 1, 1) + datetime.timedelta(weeks=i)
-        nums = [(i * 7 + j) % 49 + 1 for j in range(7)]
+        nums = [(i * 6 + j) % 49 + 1 for j in range(6)]
         rows.append({"date": pd.Timestamp(date), "numbers": nums})
 
     df = pd.DataFrame(rows)

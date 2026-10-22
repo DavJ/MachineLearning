@@ -11,7 +11,7 @@ Features are grouped into five families:
 All feature functions accept a pandas DataFrame with columns:
     draw_index  int      monotone draw counter (chronological)
     date        datetime
-    numbers     list[int]  7 numbers drawn (first game)
+    numbers     list[int]  six main numbers (bonus stored separately)
 
 and return a 2-D numpy array  (n_draws, n_features).
 """
@@ -21,6 +21,9 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 from typing import List
+
+from sportka.data import load_sportka_csv
+from sportka.rules import MAIN_COUNT, validate_numbers
 
 
 # ---------------------------------------------------------------------------
@@ -32,7 +35,7 @@ def base_features(df: pd.DataFrame) -> np.ndarray:
     n = len(df)
     out = np.zeros((n, 49), dtype=np.float32)
     for i, nums in enumerate(df["numbers"]):
-        for num in nums:
+        for num in validate_numbers(nums):
             out[i, num - 1] = 1.0
     return out
 
@@ -101,7 +104,7 @@ def _rolling_freq(numbers_list: List[List[int]], window: int) -> np.ndarray:
         for nums in numbers_list[start: i + 1]:
             for num in nums:
                 freq[num - 1] += 1.0
-        out[i] = freq / count  # P(number in draw); sum ≈ 7
+        out[i] = freq / count  # P(number in main draw); sum = 6
     return out
 
 
@@ -112,18 +115,14 @@ def _exp_decay_freq(numbers_list: List[List[int]], decay: float = 0.05) -> np.nd
     """
     n = len(numbers_list)
     out = np.zeros((n, 49), dtype=np.float32)
-    for i in range(n):
-        freq = np.zeros(49, dtype=np.float32)
-        total_weight = 0.0
-        for k, j in enumerate(range(i, -1, -1)):  # include draw i (k=0)
-            w = np.exp(-decay * k)
-            for num in numbers_list[j]:
-                freq[num - 1] += w
-            total_weight += w
-        if total_weight > 0:
-            out[i] = freq / total_weight
-        else:
-            out[i] = 1.0 / 49.0
+    freq = np.zeros(49, dtype=np.float64)
+    total_weight = 0.0
+    factor = np.exp(-decay)
+    for i, nums in enumerate(numbers_list):
+        freq *= factor
+        freq[np.asarray(nums) - 1] += 1
+        total_weight = factor * total_weight + 1
+        out[i] = freq / total_weight
     return out
 
 
@@ -135,14 +134,9 @@ def winding_history_features(df: pd.DataFrame) -> np.ndarray:
     numbers_list: List[List[int]] = df["numbers"].tolist()
     n = len(numbers_list)
 
-    # Global frequency (computed on the entire training set for reference;
-    # during walk-forward evaluation this is only the training portion)
-    global_freq = np.zeros(49, dtype=np.float32)
-    for nums in numbers_list:
-        for num in nums:
-            global_freq[num - 1] += 1.0
-    total = global_freq.sum()
-    global_freq = global_freq / total if total > 0 else np.full(49, 1.0 / 49.0, dtype=np.float32)
+    # Each row uses its own prefix only, including within the training split.
+    # Units match exp_freq: per-draw inclusion probabilities, summing to six.
+    global_freq = np.cumsum(base_features(df), axis=0) / np.arange(1, n + 1)[:, None]
 
     parts = []
     for w in [1, 4, 16, 52]:
@@ -150,7 +144,7 @@ def winding_history_features(df: pd.DataFrame) -> np.ndarray:
 
     exp_freq = _exp_decay_freq(numbers_list)
     parts.append(exp_freq)
-    parts.append(exp_freq - global_freq[np.newaxis, :])  # diff from global
+    parts.append(exp_freq - global_freq)
 
     return np.concatenate(parts, axis=1)  # (n, 49*6 = 294)
 
@@ -331,43 +325,13 @@ def build_features(
 # Data loading utilities
 # ---------------------------------------------------------------------------
 
-def load_sportka_csv(path: str) -> pd.DataFrame:
-    """
-    Load Sportka draw history from the CSV exported by sazka.cz.
-
-    The CSV format has columns (semicolon-separated):
-        date ; ? ; week ; weekday ; n1 ; n2 ; n3 ; n4 ; n5 ; n6 ; n7 ; ...
-
-    Returns a DataFrame with columns:
-        date         datetime64
-        draw_index   int        (0-based, chronological)
-        numbers      list[int]  (first 7 numbers)
-    """
-    raw = pd.read_csv(path, sep=";", header=0, encoding="latin-1")
-    # Normalise column names
-    raw.columns = [c.strip() for c in raw.columns]
-
-    rows = []
-    for _, row in raw.iterrows():
-        try:
-            vals = row.tolist()
-            date_str = str(vals[0]).strip()
-            date = pd.to_datetime(date_str, dayfirst=True)
-            nums = [int(x) for x in vals[4:11]]
-            rows.append({"date": date, "numbers": nums})
-        except Exception:
-            continue
-
-    df = pd.DataFrame(rows).sort_values("date").reset_index(drop=True)
-    df["draw_index"] = np.arange(len(df))
-    return df
-
-
 def generate_synthetic_data(n_draws: int = 500, seed: int = 42) -> pd.DataFrame:
     """
     Generate purely random Sportka-like draws for testing (null-hypothesis data).
-    Each draw picks 7 numbers without replacement from 1–49.
+    Each draw picks six main numbers plus a separate bonus without replacement.
     """
+    if n_draws < 1:
+        raise ValueError("n_draws must be positive")
     rng = np.random.default_rng(seed)
     import datetime
 
@@ -375,8 +339,10 @@ def generate_synthetic_data(n_draws: int = 500, seed: int = 42) -> pd.DataFrame:
     rows = []
     for i in range(n_draws):
         date = start + datetime.timedelta(weeks=i // 2, days=(i % 2) * 3)
-        nums = sorted(rng.choice(49, size=7, replace=False) + 1)
-        rows.append({"date": pd.Timestamp(date), "numbers": list(nums)})
+        balls = rng.choice(49, size=MAIN_COUNT + 1, replace=False) + 1
+        rows.append({"date": pd.Timestamp(date),
+                     "numbers": sorted(map(int, balls[:MAIN_COUNT])),
+                     "bonus": int(balls[-1])})
 
     df = pd.DataFrame(rows).sort_values("date").reset_index(drop=True)
     df["draw_index"] = np.arange(len(df))
@@ -390,8 +356,12 @@ def walk_forward_split(df: pd.DataFrame, train_frac: float = 0.70, val_frac: flo
     Returns (train_df, val_df, test_df).
     """
     n = len(df)
+    if not (0 < train_frac < 1 and 0 < val_frac < 1 and train_frac + val_frac < 1):
+        raise ValueError("train_frac and val_frac must be positive and sum to less than 1")
     train_end = int(n * train_frac)
     val_end = int(n * (train_frac + val_frac))
+    if train_end < 2 or val_end <= train_end or val_end >= n:
+        raise ValueError("Need at least two training draws and one validation and test draw")
     return (
         df.iloc[:train_end].reset_index(drop=True),
         df.iloc[train_end:val_end].reset_index(drop=True),
