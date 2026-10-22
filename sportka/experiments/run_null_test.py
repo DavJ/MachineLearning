@@ -7,7 +7,7 @@ Verifies whether UBT/theta features capture real structure or just overfit noise
 Experiments:
   1. Real data     — full UBT pipeline on actual (or synthetic) Sportka draws
   2. Shuffled data — same draws but with temporal order destroyed (row shuffle)
-  3. Random data   — purely synthetic draws (7 unique numbers from 1–49)
+  3. Random data   — purely synthetic draws (six main numbers plus a separate bonus from 1–49)
   4. Reversed data — chronological order reversed (future predicts past)
 
 For each condition the same UBT model and feature set are used without any
@@ -64,6 +64,8 @@ from sportka.multiscale_features import build_multiscale_tensors, flatten_multis
 from sportka.model import UBTMLPV2
 from sportka.evaluation import (
     _binary_matrix,
+    temporal_feature_split,
+    split_aligned_arrays,
     compute_all_metrics,
     bootstrap_ci_all_metrics,
     binary_cross_entropy,
@@ -88,9 +90,9 @@ MS_INCLUDE_RAW = True
 
 METRIC_COLS = ["bce", "recall_at_6", "recall_at_10", "kl_vs_uniform", "avg_hits_6", "avg_hits_10"]
 
-# Theoretical random baseline under uniform draw (7 numbers, top-k selection)
+# Theoretical random baseline under uniform draw (six main numbers, top-k selection)
 RANDOM_RECALL_6 = 6 / 49   # ≈ 0.1224
-RANDOM_HITS_6   = 7 * 6 / 49  # ≈ 0.857
+RANDOM_HITS_6   = 6 * 6 / 49  # ≈ 0.735
 
 
 # ---------------------------------------------------------------------------
@@ -170,8 +172,9 @@ def evaluate_condition(
     """
     train_df, val_df, test_df = walk_forward_split(df, TRAIN_FRAC, VAL_FRAC)
 
-    X_tr, Y_tr = _flat_xy(train_df)
-    X_te, Y_te = _flat_xy(test_df)
+    X_tr, Y_tr, _, _, X_te, Y_te = split_aligned_arrays(
+        df, flatten_multiscale_tensors(_build_tensors(df)), _binary_matrix(df), TRAIN_FRAC, VAL_FRAC
+    )
 
     model = model_cls(**model_kwargs)
 
@@ -240,41 +243,25 @@ def _apply_decision(results: dict) -> Tuple[str, str]:
     Returns (verdict, explanation) where verdict is one of:
         "NO_SIGNAL"  /  "POTENTIAL_SIGNAL"
     """
-    real_r6  = results["real"]["metrics"]["recall_at_6"]
-    real_ci  = results["real"]["ci"]["recall_at_6"]
-
-    conditions = {k: results[k]["metrics"]["recall_at_6"]
-                  for k in ["shuffled", "random", "reversed"]}
-
-    # Random baseline theoretical CI (used for comparison)
-    rnd_pred = results["real"]["Y_test"].copy()
-    # theoretical: all conditions near random
-
-    # Check whether UBT on real data is distinguishable from random/shuffled/reversed
-    # Use bootstrap CI overlap as a proxy
-    real_lo, real_hi = real_ci[1], real_ci[2]
-
-    similar_count = 0
-    for cond_name, cond_r6 in conditions.items():
-        cond_ci = results[cond_name]["ci"]["recall_at_6"]
-        cond_lo, cond_hi = cond_ci[1], cond_ci[2]
-        # CIs overlap → performance is similar
-        if real_lo <= cond_hi and cond_lo <= real_hi:
-            similar_count += 1
-
-    if similar_count >= 2:
-        verdict = "NO_SIGNAL"
-        explanation = (
-            "UBT model performance on real data is statistically indistinguishable "
-            "from at least two of the three null conditions (shuffled, random, reversed). "
-            "This indicates **no detectable structure** in the Sportka data."
-        )
-    else:
+    # Non-overlap only counts in the favorable direction. A model that is
+    # significantly WORSE than controls must never be labelled predictive.
+    real_lower = results["real"]["ci"]["recall_at_6"][1]
+    control_upper = max(results[name]["ci"]["recall_at_6"][2]
+                        for name in ("shuffled", "random", "reversed"))
+    if real_lower > max(control_upper, RANDOM_RECALL_6):
         verdict = "POTENTIAL_SIGNAL"
         explanation = (
-            "UBT model performance on real data is outside the confidence intervals "
-            "of most null conditions.  This is consistent with **potential structure**, "
-            "but must be replicated on independent data before any strong claim can be made."
+            "The real-data recall interval is above all control intervals and "
+            "the theoretical random baseline. This is an exploratory screen, "
+            "not a corrected significance test or proof of a betting edge. "
+            "Replicate on untouched future data before drawing conclusions."
+        )
+    else:
+        verdict = "NO_SIGNAL"
+        explanation = (
+            "This experiment provides no evidence that real-data recall exceeds "
+            "all controls and the theoretical random baseline. Overlapping "
+            "intervals alone do not prove equivalence or the absence of signal."
         )
 
     return verdict, explanation
@@ -486,7 +473,7 @@ def _write_report(
           f"| {'Yes ✅' if overlap else 'No ⚠️'} |")
     a("")
     a("*'Yes' means the 95% CIs of recall@6 for real and null condition overlap.*")
-    a("*Overlap in ≥ 2 conditions → NO_SIGNAL verdict.*")
+    a("*Potential signal requires the real lower bound above every control upper bound and 6/49.*")
     a("")
     a("---")
     a("")
@@ -498,11 +485,11 @@ def _write_report(
     a("Under the null:")
     a(f"- Expected `recall@6 ≈ {RANDOM_RECALL_6:.4f}` (theoretical)")
     a(f"- Expected `avg_hits_6 ≈ {RANDOM_HITS_6:.4f}` (theoretical)")
-    a(f"- All four conditions should produce statistically identical results.")
+    a("- Random variation across conditions is expected; exact equality is not required.")
     a("")
-    a("If performance on **real** data is statistically indistinguishable from")
-    a("**shuffled**, **random**, and **reversed** data, the null hypothesis cannot")
-    a("be rejected and UBT features are concluded to capture **no real structure**.")
+    a("The interval screen is exploratory, without correction for multiple model")
+    a("comparisons. Failure to clear it does not prove equivalence or no structure.")
+    a("Only independent future validation could support a forecasting claim.")
     a("")
     a("---")
     a("")
@@ -530,15 +517,12 @@ def run_null_test(
     # 1. Load real (or synthetic) data
     # ------------------------------------------------------------------
     print("\n[1/5] Loading data …")
-    if csv_path and os.path.exists(csv_path):
+    if csv_path:
         df_real = load_sportka_csv(csv_path)
         data_source = f"CSV file: {csv_path}"
         print(f"  Loaded {len(df_real)} draws from {csv_path}")
     else:
-        if csv_path:
-            print(f"  WARNING: {csv_path} not found — using synthetic random data.")
-        else:
-            print("  No CSV provided — using synthetic random data (null hypothesis).")
+        print("  No CSV provided — using synthetic random data (null hypothesis).")
         df_real = generate_synthetic_data(n_draws=800, seed=seed)
         data_source = "Synthetic random draws (null hypothesis)"
         print(f"  Generated {len(df_real)} synthetic draws.")

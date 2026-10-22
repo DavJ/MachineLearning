@@ -11,3 +11,7 @@ __pycache__/
 *.pyo
 *.log
 .DS_Store
+
+.pytest_cache/
+.venv/
+data/

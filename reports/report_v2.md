@@ -1,3 +1,5 @@
+> Historical report: predates the 2026-10-22 six-main-ball and causal-split repair. Rerun before interpreting its metrics or plots. See [report status](README.md).
+
 # Sportka UBT/Theta Experiment v2
 
 ## Overview

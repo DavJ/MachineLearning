@@ -111,7 +111,7 @@ class SportkaGUI:
         # Download button
         ttk.Button(
             data_frame,
-            text="Download Latest Data from Sazka",
+            text="Download Latest Data from Allwyn",
             command=self.download_data
         ).pack(pady=5)
         
@@ -343,10 +343,10 @@ class SportkaGUI:
     
     def download_data(self):
         """Download latest data from Sazka."""
-        self.log_message("Downloading data from Sazka...")
+        self.log_message("Downloading data from Allwyn...")
         try:
             from sportka.download import download_data_from_sazka
-            download_data_from_sazka()
+            self.data_file_var.set(download_data_from_sazka())
             self.log_message("Data downloaded successfully!")
             self.load_data()
         except Exception as e:
@@ -368,15 +368,8 @@ class SportkaGUI:
         try:
             from sportka.learn import draw_history
             
-            # Set the data file path if custom
             data_file = self.data_file_var.get()
-            if os.path.exists(data_file):
-                # Temporarily modify download function or copy file
-                import shutil
-                if data_file != '/tmp/sportka.csv':
-                    shutil.copy(data_file, '/tmp/sportka.csv')
-            
-            self.draw_history = draw_history()
+            self.draw_history = draw_history(data_file)
             
             # Display info
             self.data_info_text.config(state=tk.NORMAL)
@@ -411,6 +404,11 @@ class SportkaGUI:
         self.train_button.config(state=tk.DISABLED)
         self.stop_button.config(state=tk.NORMAL)
         self.progress_var.set(0)
+
+        # Read Tk variables on the main thread only.
+        self.training_settings = (self.use_biquaternion_var.get(),
+                                  self.epochs_var.get(), self.batch_size_var.get())
+        self.stop_requested = False
         
         # Start training thread
         self.training_thread = threading.Thread(target=self.train_model, daemon=True)
@@ -420,16 +418,17 @@ class SportkaGUI:
         """Train the model (runs in background thread)."""
         try:
             from sportka.neural_network import SportkaPredictor, create_training_data_with_biquaternion
+            import tensorflow as tf
             
             self.log_training("Initializing predictor...")
             
             # Determine input dimension based on biquaternion usage
-            use_bq = self.use_biquaternion_var.get()
+            use_bq, epochs, batch_size = self.training_settings
             input_dim = 103 if not use_bq else 103 + 48  # Base + 2*24 biquaternion features
             
             self.predictor = SportkaPredictor(
                 input_dim=input_dim,
-                hidden_layers=32,
+                hidden_layers=2,
                 hidden_units=128,
                 dropout_rate=0.3
             )
@@ -444,7 +443,7 @@ class SportkaGUI:
             )
             
             self.log_training(f"Training data shape: {x_train.shape}")
-            self.log_training(f"Starting training for {self.epochs_var.get()} epochs...")
+            self.log_training(f"Starting training for {epochs} epochs...")
             
             # Custom callback to update GUI
             class GUICallback(tf.keras.callbacks.Callback):
@@ -454,6 +453,7 @@ class SportkaGUI:
                     self.total_epochs = total_epochs
                 
                 def on_epoch_end(self, epoch, logs=None):
+                    logs = logs or {}
                     progress = ((epoch + 1) / self.total_epochs) * 100
                     self.gui.message_queue.put(('progress', progress))
                     
@@ -461,16 +461,18 @@ class SportkaGUI:
                     log_msg += f"loss: {logs.get('loss', 0):.4f} - "
                     log_msg += f"val_loss: {logs.get('val_loss', 0):.4f}"
                     self.gui.message_queue.put(('log', log_msg))
-            
-            import tensorflow as tf
+
+                def on_train_batch_end(self, batch, logs=None):
+                    if self.gui.stop_requested:
+                        self.model.stop_training = True
             
             # Train
             history = self.predictor.train(
                 x_train, y_train,
-                epochs=self.epochs_var.get(),
-                batch_size=self.batch_size_var.get(),
+                epochs=epochs,
+                batch_size=batch_size,
                 validation_split=0.2,
-                callbacks=[GUICallback(self, self.epochs_var.get())],
+                callbacks=[GUICallback(self, epochs)],
                 verbose=0
             )
             
@@ -484,10 +486,9 @@ class SportkaGUI:
     
     def stop_training(self):
         """Stop training."""
-        self.training_active = False
-        self.train_button.config(state=tk.NORMAL)
+        self.stop_requested = True
         self.stop_button.config(state=tk.DISABLED)
-        self.log_training("Training stopped by user")
+        self.log_training("Stopping training after the current batch...")
     
     def save_model(self):
         """Save the trained model."""
@@ -553,21 +554,23 @@ class SportkaGUI:
             # Parse date
             date_str = self.predict_date_var.get()
             predict_date = datetime.strptime(date_str, '%d.%m.%Y').date()
+            if predict_date <= self.draw_history.draws[-1].date:
+                raise ValueError("Prediction date must be after all loaded history; use backtest for historical dates")
             
             # Prepare input
             x_predict = date_to_x(predict_date)
             x_hist1 = self.draw_history.draws[-1].y_train_1
             x_hist2 = self.draw_history.draws[-1].y_train_2
             
-            if self.use_biquaternion_var.get():
+            if self.predictor.input_dim == 151:
                 from sportka.biquaternion import apply_biquaternion_theta_transform
                 
                 # Get top numbers and transform
-                top_nums_1 = np.argsort(x_hist1)[-7:] + 1
-                top_nums_2 = np.argsort(x_hist2)[-7:] + 1
+                top_nums_1 = self.draw_history.draws[-1].first
+                top_nums_2 = self.draw_history.draws[-1].second
                 
-                bq1 = apply_biquaternion_theta_transform(top_nums_1.tolist())
-                bq2 = apply_biquaternion_theta_transform(top_nums_2.tolist())
+                bq1 = apply_biquaternion_theta_transform(top_nums_1)
+                bq2 = apply_biquaternion_theta_transform(top_nums_2)
                 
                 x_full = np.concatenate([x_predict, x_hist1, x_hist2, bq1, bq2])
             else:
@@ -577,18 +580,18 @@ class SportkaGUI:
             
             # Make prediction
             prediction = self.predictor.predict(x_input)
-            best_numbers = self.predictor.get_best_numbers(prediction, n=7)
+            best_numbers = self.predictor.get_best_numbers(prediction, n=6)
             
             # Display results
             self.prediction_text.delete(1.0, tk.END)
             self.prediction_text.insert(tk.END, f"Prediction for {date_str}\n")
             self.prediction_text.insert(tk.END, "=" * 50 + "\n\n")
-            self.prediction_text.insert(tk.END, "Top 7 Numbers (with probabilities):\n\n")
+            self.prediction_text.insert(tk.END, "Six main numbers (experimental model scores; no proven edge):\n\n")
             
             for i, (num, prob) in enumerate(best_numbers, 1):
                 self.prediction_text.insert(
                     tk.END,
-                    f"{i}. Number {num:2d} - Probability: {prob:.4f}\n"
+                    f"{i}. Number {num:2d} - Model score: {prob:.4f}\n"
                 )
             
             self.prediction_text.insert(tk.END, "\n" + "=" * 50 + "\n")
@@ -615,6 +618,11 @@ class SportkaGUI:
         
         numbers = [n for n, _ in self.current_prediction]
         date = self.current_prediction_date
+
+        if any(item['date'] == date and set(item['numbers']) == set(numbers)
+               for item in self.selected_numbers):
+            messagebox.showinfo("Selection", "This combination is already selected for this date")
+            return
         
         self.selected_numbers.append({
             'date': date,

@@ -10,7 +10,7 @@ pillow
 #opencv-python
 scikit-image
 thriftpy2
-selenium==3.141.0
+selenium>=4.10,<5
 pandas
 #yahoo-finance
 yfinance

@@ -133,8 +133,8 @@ def theta_orthogonalization(features: np.ndarray, theta: float = np.pi/4) -> np.
     """
     Apply theta-based orthogonalization to features.
     
-    This creates an orthogonal basis rotated by theta angle,
-    reducing correlation between features.
+    This applies a norm-preserving rotation by theta. It does not in
+    general decorrelate arbitrary data or add predictive information.
     
     Args:
         features: Input feature vector
@@ -185,7 +185,7 @@ def probability_to_biquaternion_features(probability_vector: np.ndarray) -> np.n
         Biquaternion-transformed features
     """
     # Extract top numbers with their probabilities
-    top_indices = np.argsort(probability_vector)[-7:][::-1]
+    top_indices = np.argsort(probability_vector)[-6:][::-1]
     top_numbers = (top_indices + 1).tolist()
     
     return apply_biquaternion_theta_transform(top_numbers)

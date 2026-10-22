@@ -48,8 +48,8 @@ class BaseModel:
 
 class RandomPredictor(BaseModel):
     """
-    Null baseline: draw 7 numbers uniformly at random from 1–49.
-    Returns uniform probability 7/49 = 1/7 ≈ 0.143 for every number.
+    Null baseline: draw six main numbers uniformly at random from 1–49.
+    Returns uniform probability 6/49 ≈ 0.122 for every number.
     """
 
     name = "random_uniform"
@@ -59,7 +59,7 @@ class RandomPredictor(BaseModel):
 
     def predict_proba(self, X: np.ndarray) -> np.ndarray:
         n = len(X)
-        return np.full((n, 49), 7.0 / 49.0, dtype=np.float32)
+        return np.full((n, 49), 6.0 / 49.0, dtype=np.float32)
 
 
 class GlobalFreqPredictor(BaseModel):
@@ -76,7 +76,7 @@ class GlobalFreqPredictor(BaseModel):
     def fit(self, X_train: np.ndarray, Y_train: np.ndarray) -> "GlobalFreqPredictor":
         freq = Y_train.sum(axis=0).astype(np.float64)
         n_draws = len(Y_train)
-        self._freq = (freq / n_draws).astype(np.float32) if n_draws > 0 else np.full(49, 7.0 / 49.0, dtype=np.float32)
+        self._freq = (freq / n_draws).astype(np.float32) if n_draws > 0 else np.full(49, 6.0 / 49.0, dtype=np.float32)
         return self
 
     def predict_proba(self, X: np.ndarray) -> np.ndarray:
@@ -113,12 +113,12 @@ class RollingFreqPredictor(BaseModel):
     def fit(self, X_train: np.ndarray, Y_train: np.ndarray) -> "RollingFreqPredictor":
         freq = Y_train.sum(axis=0).astype(np.float64)
         n_draws = len(Y_train)
-        self._global_freq = (freq / n_draws).astype(np.float32) if n_draws > 0 else np.full(49, 7.0 / 49.0, dtype=np.float32)
+        self._global_freq = (freq / n_draws).astype(np.float32) if n_draws > 0 else np.full(49, 6.0 / 49.0, dtype=np.float32)
         return self
 
     def predict_proba(self, X: np.ndarray) -> np.ndarray:
         n_cols = X.shape[1]
-        if n_cols > self._offset + 49:
+        if n_cols >= self._offset + 49:
             probs = X[:, self._offset: self._offset + 49].astype(np.float32)
             # Features already represent P(number in draw); no re-normalisation needed
             return probs
@@ -152,8 +152,9 @@ class LogisticRegressionModel(BaseModel):
         from sklearn.linear_model import LogisticRegression
 
         self._models = []
+        self._prior = Y_train.mean(axis=0).astype(np.float32)
         for j in range(49):
-            clf = LogisticRegression(C=self._C, max_iter=self._max_iter, solver=self._solver)
+            clf = LogisticRegression(C=self._C, max_iter=self._max_iter, solver=self._solver, random_state=0)
             y_j = Y_train[:, j]
             # Only fit if both classes are present
             if y_j.sum() > 0 and (1 - y_j).sum() > 0:
@@ -165,7 +166,7 @@ class LogisticRegressionModel(BaseModel):
 
     def predict_proba(self, X: np.ndarray) -> np.ndarray:
         n = len(X)
-        out = np.full((n, 49), 7.0 / 49.0, dtype=np.float32)
+        out = np.tile(getattr(self, "_prior", np.full(49, 6.0 / 49.0, dtype=np.float32)), (n, 1))
         if self._skip:
             return out
         for j, clf in enumerate(self._models):
@@ -204,6 +205,7 @@ class MLPModel(BaseModel):
             return self
 
         self._models = []
+        self._prior = Y_train.mean(axis=0).astype(np.float32)
         for j in range(49):
             y_j = Y_train[:, j]
             if y_j.sum() > 0 and (1 - y_j).sum() > 0:
@@ -221,7 +223,7 @@ class MLPModel(BaseModel):
 
     def predict_proba(self, X: np.ndarray) -> np.ndarray:
         n = len(X)
-        out = np.full((n, 49), 7.0 / 49.0, dtype=np.float32)
+        out = np.tile(getattr(self, "_prior", np.full(49, 6.0 / 49.0, dtype=np.float32)), (n, 1))
         if self._skip:
             return out
         for j, clf in enumerate(self._models):

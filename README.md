@@ -1,300 +1,75 @@
 # Machine Learning Projects
 
-This repository contains various machine learning projects and experiments.
+Experiments in lottery modelling and financial data analysis.
 
-## Projects
+## Sportka / Allwyn
 
-### Sportka Predictor - Advanced ML System ⭐ NEW
+Sportka tools now generate valid **six-number** columns, keep the bonus ball
+separate, calculate exact jackpot odds, and evaluate research models on
+chronological held-out draws. The default ticket generator is uniform and
+avoids duplicate combinations. It works offline without TensorFlow or a browser.
 
-An advanced lottery number prediction system using biquaternion transformations and optimized neural networks.
+**No model in this repository has demonstrated a reproducible lottery edge.**
+Fair independent draws cannot be predicted from historical results. More features,
+more training, biquaternions, and theta transforms do not establish predictability.
+Winning every time or guaranteeing the largest prize is not achievable here.
 
-**Key Features:**
-- 🔬 Biquaternion mathematical transformations for richer feature representation
-- 🧮 Theta-based orthogonalization for decorrelated features
-- 🚀 Neural network optimized for M1 Mac (Metal Performance Shaders)
-- 💾 Model weight persistence (save/load functionality)
-- 🖥️ User-friendly GUI with real-time training monitoring
-- 📊 PDF printing for lottery tickets
-- ⚙️ Configurable parameters
-
-**Quick Start:**
 ```bash
-# Install dependencies
-pip install -r requirements.txt
+# Python 3.10+
+python -m pip install -r requirements-sportka.txt pytest
+python -m pytest -q
 
-# Test installation
-python sportka_launcher.py test
-
-# Run prediction
+# One valid six-number column; default odds cover both main draws
 python sportka_launcher.py predict
+python sportka_launcher.py odds --lines 1 --draws 1 --json
 
-# Launch GUI
+# Explicit synthetic diagnostic; this does not use real lottery results
+python sportka_launcher.py backtest --synthetic 1000 --seed 42
+
+# Explicitly download the public CSV, then evaluate either draw
+python sportka_launcher.py download --directory ./data
+
+# Evaluate an existing Allwyn/Sazka CSV, first or second draw
+python sportka_launcher.py backtest --csv /path/to/sportka.csv --game 1
+python sportka_launcher.py backtest --csv /path/to/sportka.csv --game 2
+```
+
+For one column in one main draw, matching all six numbers has probability
+`1 / C(49,6) = 1 / 13,983,816`. Distinct columns cover distinct jackpot outcomes;
+duplicate columns do not increase the probability of hitting a jackpot. Covering
+more outcomes also costs more. A six-number jackpot is different from the
+Superjackpot, which has additional eligibility conditions involving Šance.
+
+[Allwyn's rules and prize tiers](https://www.allwyn.cz/loterie/sportka/jak-hrat)
+and [explanation of the two draws](https://www.allwyn.cz/allwyn-svet/blog/jak-se-urcuje-vyhra-ve-sportce)
+were checked on 22 October 2026. Prices and prize amounts are not hardcoded.
+
+## Optional neural experiment and GUI
+
+```bash
+python -m pip install -r requirements-sportka-neural.txt
+python sportka_launcher.py train --csv /path/to/sportka.csv --date 01.11.2026 --epochs 10
 python sportka_launcher.py gui
 ```
 
-**Documentation:**
-- [Quick Start Guide](USAGE.md) - Get started quickly
-- [Technical Documentation](sportka/README.md) - In-depth technical details
-- [Configuration](config.json) - Customize behavior
+The neural model predicts the first main draw using earlier results from both
+draws. Its outputs are experimental scores, not demonstrated winning probabilities.
+Existing weights using seven-ball or normalised targets must be retrained.
+TensorFlow uses the available device configuration; Apple GPU support requires a
+compatible backend installation. Tkinter is needed for the GUI. No command buys
+tickets, connects to a gambling account, or increases a budget automatically.
 
-**What's New:**
-- ✨ Biquaternion transformations from unified-biquaternion-theory concepts
-- ✨ Theta-bot inspired optimization strategies
-- ✨ M1 Mac hardware acceleration
-- ✨ Complete GUI application
-- ✨ Model persistence and management
+## Documentation
 
-### Finance Projects
+- [Usage](USAGE.md): commands, CSV format, budget validation and error handling
+- [Technical notes](sportka/README.md): rules, causal evaluation and limitations
+- [Repair summary](IMPLEMENTATION_SUMMARY.md): bugs fixed and verification scope
+- [Real-data baseline check](reports/sportka_baseline_2026-10-22.md): both draws, 3,821 dates
+- [Historical reports](reports/README.md): archived experiments requiring reruns
 
-Various financial analysis and trading projects:
-- Binance integration
-- Alpha Vantage data sync
-- Kalman filter implementations
+## Finance
 
-## Repository Structure
-
-```
-MachineLearning/
-├── sportka/              # Sportka Predictor (lottery prediction)
-│   ├── biquaternion.py  # Mathematical transformations
-│   ├── neural_network.py # Optimized neural network
-│   ├── gui.py           # GUI application
-│   ├── config.py        # Configuration management
-│   └── README.md        # Technical documentation
-├── finance/             # Financial analysis projects
-├── models/              # Saved ML models
-├── predictions/         # Saved predictions
-├── requirements.txt     # Python dependencies
-├── sportka_launcher.py  # Main launcher
-├── USAGE.md            # Quick start guide
-└── README.md           # This file
-```
-
-## Installation
-
-### Prerequisites
-- Python 3.8 or higher
-- pip package manager
-
-### Install Dependencies
-```bash
-pip install -r requirements.txt
-```
-
-### Required Packages
-- `numpy` - Numerical computing
-- `tensorflow>=2.13.0` - Deep learning framework
-- `scipy` - Scientific computing
-- `pandas` - Data analysis
-- `ephem` - Astronomical calculations
-- `reportlab` - PDF generation
-
-### Optional Packages
-- `tkinter` - For GUI (usually included with Python)
-- `selenium` - For web scraping
-
-## Usage
-
-See [USAGE.md](USAGE.md) for detailed instructions.
-
-### Quick Commands
-
-```bash
-# Sportka Predictor
-python sportka_launcher.py test      # Test installation
-python sportka_launcher.py config    # Create config file
-python sportka_launcher.py predict   # Run prediction
-python sportka_launcher.py gui       # Launch GUI
-```
-
-## Features
-
-### Sportka Predictor Features
-
-1. **Advanced Mathematics**
-   - Biquaternion representations (8D complex space)
-   - Quaternion multiplication and rotations
-   - Theta-based orthogonalization
-   - Complex number encodings
-
-2. **Neural Network**
-   - Residual connections for deep networks
-   - Batch normalization for stable training
-   - Dropout regularization
-   - L2 weight regularization
-   - Early stopping
-   - Learning rate reduction
-
-3. **M1 Mac Optimization**
-   - Metal Performance Shaders support
-   - Unified memory utilization
-   - Hardware acceleration
-
-4. **User Interface**
-   - Intuitive multi-tab GUI
-   - Real-time training progress
-   - Model management
-   - PDF ticket generation
-   - Result tracking
-
-5. **Model Management**
-   - Save trained models with metadata
-   - Load previous models
-   - Version tracking with timestamps
-   - Training history logging
-
-## Project History
-
-### Recent Updates
-
-**November 2025 - Sportka Predictor v2.0**
-- Added biquaternion transformations
-- Implemented theta-based orthogonalization
-- Created comprehensive GUI
-- Added model persistence
-- Optimized for M1 Mac
-- Added configuration system
-- Created launcher script
-
-### Earlier Work
-- Original sportka predictor
-- Finance analysis tools
-- Kalman filter experiments
-
-## Technical Details
-
-### Biquaternions
-
-Biquaternions extend quaternions by using complex numbers as components:
-```
-q = w + xi + yj + zk
-where w, x, y, z ∈ ℂ
-```
-
-This provides:
-- 8D real representation (2 components per quaternion part)
-- Non-commutative algebra for capturing order
-- Natural encoding of rotations and symmetries
-
-### Theta Orthogonalization
-
-Creates orthogonal feature basis through rotation matrices:
-```python
-R(θ) = [cos(θ)  -sin(θ)]
-       [sin(θ)   cos(θ)]
-```
-
-Benefits:
-- Reduces feature correlation
-- Improves neural network learning
-- Clear geometric interpretation
-
-### Neural Network Architecture
-
-```
-Input(103 or 151) → Dense(128) → BatchNorm → Dropout
-                 ↓
-        [32 × Dense Block with Residuals]
-                 ↓
-             Dense(64) → Dropout
-                 ↓
-            Output(49, sigmoid)
-```
-
-## Performance
-
-### Training Time (M1 Mac)
-- 100 epochs: ~5-10 minutes
-- 200 epochs: ~10-20 minutes
-
-### Memory Usage
-- Training: ~2-4 GB RAM
-- Prediction: ~500 MB RAM
-
-### Accuracy
-- Depends on data quality and quantity
-- More historical data = better predictions
-- Biquaternion features improve representation
-
-## Development
-
-### Project Structure
-
-Each project has:
-- Main implementation files
-- Configuration options
-- Documentation
-- Tests (where applicable)
-
-### Code Style
-- Python 3 type hints where applicable
-- Docstrings for all public functions
-- Comments for complex algorithms
-
-### Testing
-
-```bash
-# Test sportka predictor
-python sportka_launcher.py test
-
-# Test individual modules
-python -c "import sportka.biquaternion; print('OK')"
-python -c "import sportka.neural_network; print('OK')"
-```
-
-## Contributing
-
-Areas for contribution:
-- Additional mathematical transformations
-- Performance optimizations
-- GUI improvements
-- Documentation enhancements
-- Test coverage
-- New prediction strategies
-
-## License
-
-See repository license file.
-
-## Disclaimer
-
-⚠️ **Important**: Machine learning predictions for lottery numbers are experimental and educational. Lottery outcomes are random and cannot be reliably predicted. Use responsibly and for learning purposes only.
-
-## References
-
-### Sportka Predictor
-- Biquaternion algebra in mathematics
-- Neural network optimization techniques
-- M1 Mac machine learning optimization
-- Quaternion applications in signal processing
-
-### Mathematical Background
-- Hamilton's quaternions
-- Complex number theory
-- Non-commutative algebra
-- Orthogonal transformations
-
-## Support
-
-For questions or issues:
-1. Check [USAGE.md](USAGE.md) for quick start
-2. Check [sportka/README.md](sportka/README.md) for technical details
-3. Review code comments
-4. Open GitHub issue
-
-## Acknowledgments
-
-- Inspired by unified-biquaternion-theory concepts
-- Theta-bot optimization strategies
-- TensorFlow team for M1 support
-- Python scientific computing community
-
----
-
-**Status**: ✅ Active Development
-
-**Last Updated**: November 2025
-
-**Python Version**: 3.8+
-
-**TensorFlow Version**: 2.13+
+The `finance/` directory contains separate Binance, Alpha Vantage and Kalman filter
+experiments. These are not part of the Sportka validation. `requirements.txt`
+contains the broader legacy dependencies; the smaller Sportka requirements are
+recommended for this project.

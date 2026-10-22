@@ -1,44 +1,36 @@
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.common.exceptions import WebDriverException
+"""Download the public Allwyn CSV export and validate it before replacement."""
 
-def download_data_from_sazka(directory='/tmp'):
+import os
+from pathlib import Path
+import tempfile
+
+from sportka.data import read_history
+
+HISTORY_URL = "https://www.allwyn.cz/loterie/historie-cisel?game=sportka"
+
+
+def download_data_from_sazka(directory="/tmp", timeout=30):
+    """Compatibility API: explicitly fetch CSV without Chrome or Selenium.
+
+    Validate in a temporary file, then atomically replace sportka.csv. A failed
+    request or invalid export never overwrites the user's existing history.
+    Allwyn currently serves the text export as application/ms-excel.
     """
-    Download lottery data from Sazka website.
-    
-    Requires Chrome and ChromeDriver to be installed.
-    """
-    options = webdriver.ChromeOptions()
-    options.add_argument('--headless')
-    options.add_argument('--window-size=1200x3600')
-    options.add_argument('--no-sandbox')
-    options.add_argument('--disable-dev-shm-usage')
-    prefs = {"download.default_directory": directory}
-    options.add_experimental_option("prefs", prefs)
+    import requests
 
+    directory = Path(directory)
+    directory.mkdir(parents=True, exist_ok=True)
+    destination = directory / "sportka.csv"
+    response = requests.get(HISTORY_URL, timeout=timeout)
+    response.raise_for_status()
+    temporary = None
     try:
-        driver = webdriver.Chrome(options=options)
-    except WebDriverException as e:
-        print(f"Error: Could not start Chrome WebDriver")
-        print(f"Please ensure Chrome and ChromeDriver are installed:")
-        print(f"  - Chrome: https://www.google.com/chrome/")
-        print(f"  - ChromeDriver: https://chromedriver.chromium.org/")
-        print(f"\nAlternatively, download data manually from:")
-        print(f"  https://www.sazka.cz/loterie/sportka/statistiky")
-        raise
-    
-    try:
-        driver.implicitly_wait(10)
-
-        driver.get('https://www.sazka.cz/loterie/sportka/statistiky')
-        element = driver.find_element(By.ID, 'p_lt_ctl09_wPL_p_lt_ctl03_wS_csvHistory_btnGetCSV')
-        driver.get_screenshot_as_file('sazka.png')
-        element.click()
-        driver.get_screenshot_as_file('click.png')
-        driver.quit()
-    except Exception as e:
-        print(f"Warning: Could not download data from Sazka: {e}")
-        print("Please download manually from https://www.sazka.cz/loterie/sportka/statistiky")
-        if 'driver' in locals():
-            driver.quit()
-        raise
+        with tempfile.NamedTemporaryFile(dir=directory, suffix=".csv", delete=False) as handle:
+            temporary = Path(handle.name)
+            handle.write(response.content)
+        read_history(temporary)
+        os.replace(temporary, destination)
+        return str(destination)
+    finally:
+        if temporary is not None:
+            temporary.unlink(missing_ok=True)

@@ -1,0 +1,4 @@
+-r requirements-sportka.txt
+tensorflow>=2.16,<3
+ephem
+reportlab

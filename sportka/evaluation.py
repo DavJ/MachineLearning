@@ -16,6 +16,7 @@ import pandas as pd
 from typing import Dict, List, Tuple, Callable
 
 from sportka.features import build_features, walk_forward_split
+from sportka.rules import MAIN_COUNT, POOL_SIZE
 
 
 # ---------------------------------------------------------------------------
@@ -27,22 +28,14 @@ EPS = 1e-9  # numerical stability
 
 def assert_probability_scale(p: np.ndarray) -> None:
     """
-    Assert that a 49-element probability vector has the expected sum (~7).
+    Assert finite inclusion probabilities with each row summing to six.
 
-    Each element should represent P(number appears in a draw).  Since exactly
-    7 numbers are drawn each time, the sum over all 49 numbers must be ≈ 7.
-
-    Args:
-        p: 1-D array of length 49 (or 2-D (n, 49) where the row mean is checked).
-    Raises:
-        AssertionError if the sum is outside [6.0, 8.0].
+    This checks each row separately; invalid rows cannot cancel one another.
     """
     arr = np.asarray(p, dtype=np.float64)
-    if arr.ndim == 2:
-        s = float(arr.mean(axis=0).sum())
-    else:
-        s = float(arr.sum())
-    assert 6.0 < s < 8.0, f"Probability sum out of range: {s:.4f} (expected ~7)"
+    assert arr.ndim in (1, 2) and arr.shape[-1] == POOL_SIZE and arr.size, "Expected (..., 49) probabilities"
+    assert np.all(np.isfinite(arr)) and np.all((arr >= 0) & (arr <= 1)), "Probabilities must be finite and in [0, 1]"
+    assert np.allclose(arr.sum(axis=-1), MAIN_COUNT, atol=1e-4), "Each probability row must sum to six"
 
 
 def binary_cross_entropy(y_true: np.ndarray, y_pred: np.ndarray) -> float:
@@ -55,8 +48,10 @@ def binary_cross_entropy(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     Returns:
         Scalar BCE (lower is better).
     """
-    p = np.clip(y_pred, EPS, 1 - EPS)
-    bce = -(y_true * np.log(p) + (1 - y_true) * np.log(1 - p))
+    # float32 rounds 1 - 1e-9 back to 1, causing log(0) and NaN even
+    # for a perfect prediction. Clip in float64, then use stable log1p.
+    p = np.clip(np.asarray(y_pred, dtype=np.float64), EPS, 1 - EPS)
+    bce = -(y_true * np.log(p) + (1 - y_true) * np.log1p(-p))
     return float(bce.mean())
 
 
@@ -120,14 +115,31 @@ def avg_hits(y_true: np.ndarray, y_pred: np.ndarray, k: int = 6) -> float:
 def compute_all_metrics(
     y_true: np.ndarray, y_pred: np.ndarray
 ) -> Dict[str, float]:
-    """Compute all evaluation metrics and return as a dict."""
+    """Compute probability scores and six-number ticket hit rates.
+
+    Hit rates do not represent profit: payout amounts and shared jackpots
+    are absent. The bonus tier requires the separate bonus-ball column.
+    """
+    if y_true.shape != y_pred.shape or y_true.ndim != 2 or y_true.shape[1] != POOL_SIZE or not len(y_true):
+        raise ValueError("Expected matching nonempty (n, 49) truth and prediction arrays")
+    if not np.all(np.isfinite(y_pred)) or not np.all((y_pred >= 0) & (y_pred <= 1)):
+        raise ValueError("Predictions must be finite and in [0, 1]")
+    if not np.all((y_true == 0) | (y_true == 1)) or not np.all(y_true.sum(axis=1) == MAIN_COUNT):
+        raise ValueError("Each target must contain exactly six main numbers")
+    top = np.argsort(y_pred, axis=1)[:, -MAIN_COUNT:]
+    hits = np.take_along_axis(y_true, top, axis=1).sum(axis=1)
     return {
         "bce": binary_cross_entropy(y_true, y_pred),
+        "brier": float(np.mean((y_true - y_pred) ** 2)),
         "recall_at_6": topk_recall(y_true, y_pred, k=6),
         "recall_at_10": topk_recall(y_true, y_pred, k=10),
         "kl_vs_uniform": kl_divergence_vs_uniform(y_pred),
         "avg_hits_6": avg_hits(y_true, y_pred, k=6),
         "avg_hits_10": avg_hits(y_true, y_pred, k=10),
+        "ticket_3plus_rate": float(np.mean(hits >= 3)),
+        "ticket_4plus_rate": float(np.mean(hits >= 4)),
+        "ticket_5plus_rate": float(np.mean(hits >= 5)),
+        "ticket_6_rate": float(np.mean(hits == 6)),
     }
 
 
@@ -152,15 +164,9 @@ def walk_forward_eval(
     Returns:
         (val_metrics, test_metrics) — dicts from compute_all_metrics.
     """
-    train_df, val_df, test_df = walk_forward_split(df, train_frac, val_frac)
-
-    # Determine global normalisation range from the training split only.
-    # Always computed; only used when 'time' features are requested (build_features ignores it otherwise).
-    max_draw_index = float(train_df["draw_index"].max())
-
-    X_train, Y_train = _align_xy(train_df, feature_groups, max_draw_index=max_draw_index)
-    X_val,   Y_val   = _align_xy(val_df,   feature_groups, max_draw_index=max_draw_index)
-    X_test,  Y_test  = _align_xy(test_df,  feature_groups, max_draw_index=max_draw_index)
+    X_train, Y_train, X_val, Y_val, X_test, Y_test = temporal_feature_split(
+        df, feature_groups, train_frac, val_frac
+    )
 
     model.fit(X_train, Y_train)
 
@@ -175,12 +181,31 @@ def walk_forward_eval(
 
 def _binary_matrix(df: pd.DataFrame) -> np.ndarray:
     """Convert numbers column to (n, 49) binary matrix."""
-    n = len(df)
-    mat = np.zeros((n, 49), dtype=np.float32)
-    for i, nums in enumerate(df["numbers"]):
-        for num in nums:
-            mat[i, num - 1] = 1.0
-    return mat
+    from sportka.features import base_features
+    return base_features(df)
+
+
+def split_aligned_arrays(df, features, targets, train_frac=0.70, val_frac=0.15):
+    """Split by target date, preserving prior history across split boundaries.
+
+    features[i] describes draw i and predicts targets[i+1]. Validation and
+    test include every target in those splits; only the first overall draw
+    lacks history. Feature construction must itself be causal.
+    """
+    train, val, _ = walk_forward_split(df, train_frac, val_frac)
+    if len(features) != len(df) or len(targets) != len(df):
+        raise ValueError("Features and targets must match the draw history length")
+    a, b = len(train) - 1, len(train) + len(val) - 1
+    x, y = features[:-1], targets[1:]
+    return x[:a], y[:a], x[a:b], y[a:b], x[b:], y[b:]
+
+
+def temporal_feature_split(df, feature_groups, train_frac=0.70, val_frac=0.15):
+    """Causal features with a time scale fitted on the training split only."""
+    train, _, _ = walk_forward_split(df, train_frac, val_frac)
+    features = build_features(df, feature_groups,
+                              max_draw_index=float(train["draw_index"].max()))
+    return split_aligned_arrays(df, features, _binary_matrix(df), train_frac, val_frac)
 
 
 def _align_xy(
@@ -201,6 +226,9 @@ def _align_xy(
         max_draw_index: Passed to build_features for consistent time
             normalisation across all splits (use the training-set max).
     """
+    # A fixed fallback keeps this helper invariant to appending future rows.
+    if max_draw_index is None:
+        max_draw_index = 1.0
     X_all = build_features(df, feature_groups, max_draw_index=max_draw_index)   # (n, d)
     Y_all = _binary_matrix(df)                                                    # (n, 49)
     return X_all[:-1], Y_all[1:]                                                  # (n-1, d), (n-1, 49)
@@ -291,12 +319,10 @@ def shuffled_labels_test(
     """
     rng = np.random.default_rng(seed)
 
-    train_df, val_df, test_df = walk_forward_split(df, train_frac, val_frac)
-
-    X_train, Y_train = _align_xy(train_df, feature_groups)
+    X_train, Y_train, _, _, X_test, Y_test = temporal_feature_split(
+        df, feature_groups, train_frac, val_frac
+    )
     Y_train_shuffled = Y_train[rng.permutation(len(Y_train))]
-
-    X_test, Y_test = _align_xy(test_df, feature_groups)
 
     model.fit(X_train, Y_train_shuffled)
     y_pred = model.predict_proba(X_test)
@@ -321,10 +347,9 @@ def reversed_time_test(
     df_rev = df.iloc[::-1].reset_index(drop=True)
     df_rev["draw_index"] = np.arange(len(df_rev))
 
-    train_df, val_df, test_df = walk_forward_split(df_rev, train_frac, val_frac)
-
-    X_train, Y_train = _align_xy(train_df, feature_groups)
-    X_test,  Y_test  = _align_xy(test_df,  feature_groups)
+    X_train, Y_train, _, _, X_test, Y_test = temporal_feature_split(
+        df_rev, feature_groups, train_frac, val_frac
+    )
 
     model.fit(X_train, Y_train)
     y_pred = model.predict_proba(X_test)

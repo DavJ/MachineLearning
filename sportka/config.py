@@ -6,6 +6,7 @@ Handles user preferences and system settings.
 
 import json
 import os
+from copy import deepcopy
 from typing import Dict, Any
 
 
@@ -18,14 +19,14 @@ DEFAULT_CONFIG = {
     "training": {
         "default_epochs": 100,
         "default_batch_size": 32,
-        "default_hidden_layers": 32,
+        "default_hidden_layers": 2,
         "default_hidden_units": 128,
         "default_dropout_rate": 0.3,
         "use_biquaternion": True,
         "validation_split": 0.2
     },
     "prediction": {
-        "number_of_predictions": 7,
+        "number_of_predictions": 6,
         "generate_alternatives": 3,
         "alternative_pool_size": 12
     },
@@ -59,7 +60,7 @@ class Config:
             config_path: Path to configuration file
         """
         self.config_path = config_path
-        self.config = DEFAULT_CONFIG.copy()
+        self.config = deepcopy(DEFAULT_CONFIG)
         self.load()
     
     def load(self) -> None:
@@ -138,7 +139,7 @@ class Config:
     
     def reset_to_defaults(self) -> None:
         """Reset configuration to defaults."""
-        self.config = DEFAULT_CONFIG.copy()
+        self.config = deepcopy(DEFAULT_CONFIG)
     
     def export_config(self, path: str) -> None:
         """

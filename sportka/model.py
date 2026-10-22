@@ -117,6 +117,7 @@ class UBTMLPV2(BaseModel):
 
         Xf = _flatten4d(X_train)
         self._models = []
+        self._prior = Y_train.mean(axis=0).astype(np.float32)
         for j in range(49):
             y_j = Y_train[:, j]
             if y_j.sum() > 0 and (1 - y_j).sum() > 0:
@@ -135,7 +136,7 @@ class UBTMLPV2(BaseModel):
     def predict_proba(self, X: np.ndarray) -> np.ndarray:
         Xf = _flatten4d(X)
         n = len(Xf)
-        out = np.full((n, 49), 7.0 / 49.0, dtype=np.float32)
+        out = np.tile(getattr(self, "_prior", np.full(49, 6.0 / 49.0, dtype=np.float32)), (n, 1))
         for j, clf in enumerate(self._models):
             if clf is not None:
                 out[:, j] = clf.predict_proba(Xf)[:, 1].astype(np.float32)
@@ -227,6 +228,7 @@ class UBTCNNv2(BaseModel):
 
         Xf = self._extract_features(X_train)
         self._models = []
+        self._prior = Y_train.mean(axis=0).astype(np.float32)
         for j in range(49):
             y_j = Y_train[:, j]
             if y_j.sum() > 0 and (1 - y_j).sum() > 0:
@@ -245,7 +247,7 @@ class UBTCNNv2(BaseModel):
     def predict_proba(self, X: np.ndarray) -> np.ndarray:
         Xf = self._extract_features(X)
         n = len(Xf)
-        out = np.full((n, 49), 7.0 / 49.0, dtype=np.float32)
+        out = np.tile(getattr(self, "_prior", np.full(49, 6.0 / 49.0, dtype=np.float32)), (n, 1))
         for j, clf in enumerate(self._models):
             if clf is not None:
                 out[:, j] = clf.predict_proba(Xf)[:, 1].astype(np.float32)
