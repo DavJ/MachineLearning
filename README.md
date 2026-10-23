@@ -67,6 +67,13 @@ tickets, connects to a gambling account, or increases a budget automatically.
 - [Real-data baseline check](reports/sportka_baseline_2026-10-22.md): both draws, 3,821 dates
 - [Historical reports](reports/README.md): archived experiments requiring reruns
 
+## Signal audit
+
+[Audit and sensitivity controls](docs/sportka_signal_audit.md) test single-number
+frequencies, all pairs and temporal ordering against appropriate lottery and
+permutation references, with explicit search correction. These are historical
+diagnostics and synthetic detector checks, not a demonstrated betting edge.
+
 ## Finance
 
 The `finance/` directory contains separate Binance, Alpha Vantage and Kalman filter
