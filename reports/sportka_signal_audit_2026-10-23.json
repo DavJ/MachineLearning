@@ -1,0 +1,561 @@
+{
+  "checked_on": "2026-10-23",
+  "source_url": "https://www.allwyn.cz/loterie/historie-cisel?game=sportka",
+  "audit_source_sha256": "c5ea0c78b7478a649659c4d65f21fb0f0a5ffd3014570dc11d67364225b698c2",
+  "verification": {
+    "local_tests_passed": 94,
+    "new_audit_tests": 22,
+    "cached_audit_reproduced": true,
+    "main_and_sensitivity_ordering_resamples_match": true
+  },
+  "audit": {
+    "version": "sportka-signal-audit-v1",
+    "source_sha256": "631ecac60a8884a96a5331675972edc336f07e826c72eea207f66edc8442d5d6",
+    "seed": 42,
+    "alpha": 0.05,
+    "resamples": 1999,
+    "lags": [
+      1,
+      2,
+      5,
+      10
+    ],
+    "families_in_correction": 6,
+    "minimum_overall_adjusted_pvalue": 0.003,
+    "nulls": {
+      "numbers_pairs": "Independent uniform six-element subsets of 1..49; main balls only",
+      "ordering": "Conditional row exchangeability, preserving the complete observed draw multiset"
+    },
+    "correction": "Maximum absolute scaled deviation within each family; Bonferroni across all requested draw/family combinations",
+    "limitations": [
+      "Historical diagnostic, not a prediction model or proof of a betting advantage",
+      "Pair deviations may be explained by marginal bias; rejection does not identify a mechanism",
+      "Ordering rejection can reflect regime changes, data artifacts or dependence; it is not automatically useful for prediction",
+      "Correction covers only the prespecified families/lags in this invocation, not all prior or future analyses",
+      "Non-rejection does not prove randomness or exclude weak, different or time-varying signals"
+    ],
+    "games": {
+      "1": {
+        "draw_count": 3821,
+        "date_range": [
+          "1994-01-09",
+          "2026-10-21"
+        ],
+        "uniform_calibration": {
+          "version": "sportka-signal-audit-v1",
+          "n": 3821,
+          "resamples": 1999,
+          "seed": 42,
+          "numpy": "2.3.5",
+          "cache_reused": true,
+          "identity": "89c192b61b918829e673c17a"
+        },
+        "families": {
+          "numbers": {
+            "hypotheses": 49,
+            "maximum_scaled_deviation": 2.5602193427047792,
+            "maxstat_pvalue": 0.4315,
+            "overall_adjusted_pvalue": 1.0,
+            "rejected_after_correction": false,
+            "top_features": [
+              {
+                "feature": 1,
+                "count": 416,
+                "expected_count": 467.87755102040813,
+                "scaled_deviation": 2.5602193427047792,
+                "overall_maxstat_adjusted_pvalue": 1.0
+              },
+              {
+                "feature": 29,
+                "count": 516,
+                "expected_count": 467.87755102040813,
+                "scaled_deviation": 2.374900554719857,
+                "overall_maxstat_adjusted_pvalue": 1.0
+              },
+              {
+                "feature": 18,
+                "count": 512,
+                "expected_count": 467.87755102040813,
+                "scaled_deviation": 2.1774957588228716,
+                "overall_maxstat_adjusted_pvalue": 1.0
+              },
+              {
+                "feature": 6,
+                "count": 506,
+                "expected_count": 467.87755102040813,
+                "scaled_deviation": 1.8813885649773932,
+                "overall_maxstat_adjusted_pvalue": 1.0
+              },
+              {
+                "feature": 33,
+                "count": 431,
+                "expected_count": 467.87755102040813,
+                "scaled_deviation": 1.8199513580910838,
+                "overall_maxstat_adjusted_pvalue": 1.0
+              }
+            ]
+          },
+          "pairs": {
+            "hypotheses": 1176,
+            "maximum_scaled_deviation": 3.497817756955707,
+            "maxstat_pvalue": 0.5665,
+            "overall_adjusted_pvalue": 1.0,
+            "rejected_after_correction": false,
+            "top_features": [
+              {
+                "feature": [
+                  18,
+                  39
+                ],
+                "count": 73,
+                "expected_count": 48.73724489795919,
+                "scaled_deviation": 3.497817756955707,
+                "overall_maxstat_adjusted_pvalue": 1.0
+              },
+              {
+                "feature": [
+                  6,
+                  20
+                ],
+                "count": 71,
+                "expected_count": 48.73724489795919,
+                "scaled_deviation": 3.2094895978290876,
+                "overall_maxstat_adjusted_pvalue": 1.0
+              },
+              {
+                "feature": [
+                  20,
+                  29
+                ],
+                "count": 70,
+                "expected_count": 48.73724489795919,
+                "scaled_deviation": 3.0653255182657784,
+                "overall_maxstat_adjusted_pvalue": 1.0
+              },
+              {
+                "feature": [
+                  6,
+                  17
+                ],
+                "count": 69,
+                "expected_count": 48.73724489795919,
+                "scaled_deviation": 2.9211614387024687,
+                "overall_maxstat_adjusted_pvalue": 1.0
+              },
+              {
+                "feature": [
+                  19,
+                  38
+                ],
+                "count": 69,
+                "expected_count": 48.73724489795919,
+                "scaled_deviation": 2.9211614387024687,
+                "overall_maxstat_adjusted_pvalue": 1.0
+              }
+            ]
+          },
+          "ordering": {
+            "hypotheses": 200,
+            "maximum_scaled_deviation": 2.5986672818224474,
+            "maxstat_pvalue": 0.4795,
+            "overall_adjusted_pvalue": 1.0,
+            "rejected_after_correction": false,
+            "top_features": [
+              {
+                "feature": {
+                  "lag": 10,
+                  "number": 39
+                },
+                "count": 79,
+                "expected_count": 59.03357855664001,
+                "scaled_deviation": 2.5986672818224474,
+                "overall_maxstat_adjusted_pvalue": 1.0
+              },
+              {
+                "feature": {
+                  "lag": 5,
+                  "number": 2
+                },
+                "count": 76,
+                "expected_count": 58.12070467559409,
+                "scaled_deviation": 2.3452274153437096,
+                "overall_maxstat_adjusted_pvalue": 1.0
+              },
+              {
+                "feature": {
+                  "lag": 2,
+                  "number": 4
+                },
+                "count": 41,
+                "expected_count": 58.16639705348371,
+                "scaled_deviation": 2.2508319521085993,
+                "overall_maxstat_adjusted_pvalue": 1.0
+              },
+              {
+                "feature": {
+                  "lag": 10,
+                  "number": 2
+                },
+                "count": 42,
+                "expected_count": 58.04455071244473,
+                "scaled_deviation": 2.1059440717563507,
+                "overall_maxstat_adjusted_pvalue": 1.0
+              },
+              {
+                "feature": {
+                  "lag": 10,
+                  "number": 24
+                },
+                "count": 74,
+                "expected_count": 58.29102438850607,
+                "scaled_deviation": 2.0575340055660605,
+                "overall_maxstat_adjusted_pvalue": 1.0
+              }
+            ]
+          }
+        }
+      },
+      "2": {
+        "draw_count": 3821,
+        "date_range": [
+          "1994-01-09",
+          "2026-10-21"
+        ],
+        "uniform_calibration": {
+          "version": "sportka-signal-audit-v1",
+          "n": 3821,
+          "resamples": 1999,
+          "seed": 42,
+          "numpy": "2.3.5",
+          "cache_reused": true,
+          "identity": "89c192b61b918829e673c17a"
+        },
+        "families": {
+          "numbers": {
+            "hypotheses": 49,
+            "maximum_scaled_deviation": 2.461516944756286,
+            "maxstat_pvalue": 0.5265,
+            "overall_adjusted_pvalue": 1.0,
+            "rejected_after_correction": false,
+            "top_features": [
+              {
+                "feature": 16,
+                "count": 418,
+                "expected_count": 467.87755102040813,
+                "scaled_deviation": 2.461516944756286,
+                "overall_maxstat_adjusted_pvalue": 1.0
+              },
+              {
+                "feature": 40,
+                "count": 513,
+                "expected_count": 467.87755102040813,
+                "scaled_deviation": 2.2268469577971177,
+                "overall_maxstat_adjusted_pvalue": 1.0
+              },
+              {
+                "feature": 45,
+                "count": 425,
+                "expected_count": 467.87755102040813,
+                "scaled_deviation": 2.116058551936562,
+                "overall_maxstat_adjusted_pvalue": 1.0
+              },
+              {
+                "feature": 44,
+                "count": 510,
+                "expected_count": 467.87755102040813,
+                "scaled_deviation": 2.0787933608743785,
+                "overall_maxstat_adjusted_pvalue": 1.0
+              },
+              {
+                "feature": 24,
+                "count": 427,
+                "expected_count": 467.87755102040813,
+                "scaled_deviation": 2.0173561539880693,
+                "overall_maxstat_adjusted_pvalue": 1.0
+              }
+            ]
+          },
+          "pairs": {
+            "hypotheses": 1176,
+            "maximum_scaled_deviation": 3.2094895978290876,
+            "maxstat_pvalue": 0.867,
+            "overall_adjusted_pvalue": 1.0,
+            "rejected_after_correction": false,
+            "top_features": [
+              {
+                "feature": [
+                  40,
+                  49
+                ],
+                "count": 71,
+                "expected_count": 48.73724489795919,
+                "scaled_deviation": 3.2094895978290876,
+                "overall_maxstat_adjusted_pvalue": 1.0
+              },
+              {
+                "feature": [
+                  1,
+                  19
+                ],
+                "count": 27,
+                "expected_count": 48.73724489795919,
+                "scaled_deviation": 3.1337299029565333,
+                "overall_maxstat_adjusted_pvalue": 1.0
+              },
+              {
+                "feature": [
+                  4,
+                  18
+                ],
+                "count": 28,
+                "expected_count": 48.73724489795919,
+                "scaled_deviation": 2.9895658233932236,
+                "overall_maxstat_adjusted_pvalue": 1.0
+              },
+              {
+                "feature": [
+                  7,
+                  24
+                ],
+                "count": 28,
+                "expected_count": 48.73724489795919,
+                "scaled_deviation": 2.9895658233932236,
+                "overall_maxstat_adjusted_pvalue": 1.0
+              },
+              {
+                "feature": [
+                  6,
+                  22
+                ],
+                "count": 69,
+                "expected_count": 48.73724489795919,
+                "scaled_deviation": 2.9211614387024687,
+                "overall_maxstat_adjusted_pvalue": 1.0
+              }
+            ]
+          },
+          "ordering": {
+            "hypotheses": 200,
+            "maximum_scaled_deviation": 2.733306482927978,
+            "maxstat_pvalue": 0.3135,
+            "overall_adjusted_pvalue": 1.0,
+            "rejected_after_correction": false,
+            "top_features": [
+              {
+                "feature": {
+                  "lag": 10,
+                  "number": 17
+                },
+                "count": 78,
+                "expected_count": 57.30826282421065,
+                "scaled_deviation": 2.733306482927978,
+                "overall_maxstat_adjusted_pvalue": 1.0
+              },
+              {
+                "feature": {
+                  "lag": 5,
+                  "number": 9
+                },
+                "count": 79,
+                "expected_count": 58.36750172304884,
+                "scaled_deviation": 2.700637321549116,
+                "overall_maxstat_adjusted_pvalue": 1.0
+              },
+              {
+                "feature": {
+                  "lag": 10,
+                  "number": 44
+                },
+                "count": 86,
+                "expected_count": 67.77764996690924,
+                "scaled_deviation": 2.213406247503615,
+                "overall_maxstat_adjusted_pvalue": 1.0
+              },
+              {
+                "feature": {
+                  "lag": 10,
+                  "number": 28
+                },
+                "count": 40,
+                "expected_count": 55.36780481521929,
+                "scaled_deviation": 2.06530018214612,
+                "overall_maxstat_adjusted_pvalue": 1.0
+              },
+              {
+                "feature": {
+                  "lag": 1,
+                  "number": 29
+                },
+                "count": 72,
+                "expected_count": 56.95420047108087,
+                "scaled_deviation": 1.9936659481539247,
+                "overall_maxstat_adjusted_pvalue": 1.0
+              }
+            ]
+          }
+        }
+      }
+    },
+    "sensitivity": {
+      "3821": {
+        "draw_count": 3821,
+        "trials_per_level": 64,
+        "target": "Audit detectors, not neural-network training or ticket profitability",
+        "ordering_permutations_per_trial": 1999,
+        "note": "Synthetic controls only; zero strength estimates size for that family, not forecasting skill. Wilson intervals condition on the shared uniform calibration and do not include its Monte Carlo uncertainty.",
+        "levels": [
+          {
+            "alternative": "number",
+            "mixture_strength": 0.0,
+            "trials": 64,
+            "detections": 0,
+            "detection_rate": 0.0,
+            "conditional_wilson_95_interval": [
+              0.0,
+              0.05662405979280534
+            ],
+            "number_1_inclusion_probability": 0.12244897959183673
+          },
+          {
+            "alternative": "number",
+            "mixture_strength": 0.01,
+            "trials": 64,
+            "detections": 5,
+            "detection_rate": 0.078125,
+            "conditional_wilson_95_interval": [
+              0.03383117690855046,
+              0.17019537354162906
+            ],
+            "number_1_inclusion_probability": 0.13122448979591836
+          },
+          {
+            "alternative": "number",
+            "mixture_strength": 0.025,
+            "trials": 64,
+            "detections": 40,
+            "detection_rate": 0.625,
+            "conditional_wilson_95_interval": [
+              0.502503786840045,
+              0.7333401982117536
+            ],
+            "number_1_inclusion_probability": 0.14438775510204083
+          },
+          {
+            "alternative": "number",
+            "mixture_strength": 0.05,
+            "trials": 64,
+            "detections": 64,
+            "detection_rate": 1.0,
+            "conditional_wilson_95_interval": [
+              0.9433759402071946,
+              1.0
+            ],
+            "number_1_inclusion_probability": 0.1663265306122449
+          },
+          {
+            "alternative": "pair",
+            "mixture_strength": 0.0,
+            "trials": 64,
+            "detections": 0,
+            "detection_rate": 0.0,
+            "conditional_wilson_95_interval": [
+              0.0,
+              0.05662405979280534
+            ],
+            "pair_1_2_probability": 0.012755102040816327,
+            "all_number_marginals": 0.12244897959183673
+          },
+          {
+            "alternative": "pair",
+            "mixture_strength": 0.025,
+            "trials": 64,
+            "detections": 0,
+            "detection_rate": 0.0,
+            "conditional_wilson_95_interval": [
+              0.0,
+              0.05662405979280534
+            ],
+            "pair_1_2_probability": 0.015497448979591837,
+            "all_number_marginals": 0.12244897959183673
+          },
+          {
+            "alternative": "pair",
+            "mixture_strength": 0.05,
+            "trials": 64,
+            "detections": 2,
+            "detection_rate": 0.03125,
+            "conditional_wilson_95_interval": [
+              0.008612138346171874,
+              0.10697291770958313
+            ],
+            "pair_1_2_probability": 0.018239795918367347,
+            "all_number_marginals": 0.12244897959183673
+          },
+          {
+            "alternative": "pair",
+            "mixture_strength": 0.1,
+            "trials": 64,
+            "detections": 50,
+            "detection_rate": 0.78125,
+            "conditional_wilson_95_interval": [
+              0.6656721604337418,
+              0.8649768059328052
+            ],
+            "pair_1_2_probability": 0.023724489795918367,
+            "all_number_marginals": 0.12244897959183673
+          },
+          {
+            "alternative": "temporal",
+            "mixture_strength": 0.0,
+            "trials": 64,
+            "detections": 1,
+            "detection_rate": 0.015625,
+            "conditional_wilson_95_interval": [
+              0.002763541923337505,
+              0.08334101600094265
+            ],
+            "copy_previous_probability": 0.0
+          },
+          {
+            "alternative": "temporal",
+            "mixture_strength": 0.005,
+            "trials": 64,
+            "detections": 7,
+            "detection_rate": 0.109375,
+            "conditional_wilson_95_interval": [
+              0.05400113344416797,
+              0.20898641326896122
+            ],
+            "copy_previous_probability": 0.005
+          },
+          {
+            "alternative": "temporal",
+            "mixture_strength": 0.01,
+            "trials": 64,
+            "detections": 39,
+            "detection_rate": 0.609375,
+            "conditional_wilson_95_interval": [
+              0.4869191788027247,
+              0.7194443081175993
+            ],
+            "copy_previous_probability": 0.01
+          },
+          {
+            "alternative": "temporal",
+            "mixture_strength": 0.025,
+            "trials": 64,
+            "detections": 64,
+            "detection_rate": 1.0,
+            "conditional_wilson_95_interval": [
+              0.9433759402071946,
+              1.0
+            ],
+            "copy_previous_probability": 0.025
+          }
+        ]
+      }
+    },
+    "verdict": "NO_CORRECTED_DEVIATION_DETECTED",
+    "prediction_edge": "NOT_ESTABLISHED"
+  }
+}
