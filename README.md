@@ -74,6 +74,12 @@ frequencies, all pairs and temporal ordering against appropriate lottery and
 permutation references, with explicit search correction. These are historical
 diagnostics and synthetic detector checks, not a demonstrated betting edge.
 
+[Prospective checks](docs/sportka_prospective.md) seal three baseline forecasts
+for both main draws before a future date and score only new results. A fixed
+mixture of sequential tests accounts for the registered models and repeated
+inspection. Forecasts and protocol must be published before their target day;
+the initial ledger has no scored prospective results.
+
 ## Finance
 
 The `finance/` directory contains separate Binance, Alpha Vantage and Kalman filter
