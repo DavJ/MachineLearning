@@ -64,6 +64,7 @@ tickets, connects to a gambling account, or increases a budget automatically.
 - [Usage](USAGE.md): commands, CSV format, budget validation and error handling
 - [Technical notes](sportka/README.md): rules, causal evaluation and limitations
 - [Repair summary](IMPLEMENTATION_SUMMARY.md): bugs fixed and verification scope
+- [Neural theta/Möbius/Mertens check](reports/sportka_theta_mobius_2026-10-23.md): comparable variants and saved checkpoints
 - [Real-data baseline check](reports/sportka_baseline_2026-10-22.md): both draws, 3,821 dates
 - [Historical reports](reports/README.md): archived experiments requiring reruns
 

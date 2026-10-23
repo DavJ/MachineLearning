@@ -131,3 +131,36 @@ six numbers, and exports results/PDFs. Its stop button requests a stop after the
 current training batch. The public CSV downloader is a separate explicit
 action and needs no browser. If its format or URL changes, load the official CSV
 manually and update the parser. There is no automated betting integration.
+
+## Theta / Möbius / Mertens research comparison
+
+```bash
+python sportka_launcher.py download --directory ./data
+python -m sportka.experiments.theta_mobius --csv data/sportka.csv --game 1
+python -m sportka.experiments.theta_mobius --csv data/sportka.csv --game 2
+```
+
+The four variants use the same 147 feature positions, target dates, fixed MLP
+settings and chronological training/validation/test split after a 52-draw warmup.
+The last draw remains raw in every variant; the 16/52-draw frequency channels
+are raw or receive a finite theta-like cosine transform. Möbius variants use
+mu(n) coefficients; Mertens variants use their partial sums. This experiment is
+not the separate adaptive Theta Grid architecture and does not derive a lottery
+signal from UBT. JSON reports both validation and test scores and iteration limits.
+
+Models are saved automatically under `models/sportka_research`. An identical
+source/configuration reuses the saved model, avoiding repeated fitting. The key
+includes the CSV hash, draw, feature settings, network parameters and dependency
+versions. The checkpoint also verifies the exact training arrays before reuse.
+Use only a local checkpoint directory you trust, because joblib files execute
+Python code when loaded. To retrain explicitly:
+
+```bash
+python -m sportka.experiments.theta_mobius --csv data/sportka.csv --game 1 --fresh
+```
+
+`--hidden`, `--max-iter` and `--seed` change the configuration and create a new
+checkpoint identity. Changed history is retrained for the fixed chronological
+protocol; cached models do not incrementally resume optimization on new data.
+Choosing a winning variant from these test scores would be retrospective model
+selection. A forecasting claim needs a prespecified future evaluation.
