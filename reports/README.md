@@ -18,3 +18,6 @@ The second command is a synthetic null diagnostic, not a real lottery backtest.
 [Corrected real-data baseline check, 22 October 2026](sportka_baseline_2026-10-22.md)
 includes both draws, the source hash and all metrics. It demonstrates execution
 and reports held-out point estimates; it does not establish a betting edge.
+
+[Neural theta/Möbius/Mertens check, 23 October 2026](sportka_theta_mobius_2026-10-23.md)
+compares equal-input variants and verifies reuse of all eight saved models.
