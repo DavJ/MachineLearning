@@ -120,6 +120,8 @@ version-history record is essential: verify that each complete forecast and
 protocol were published before the target Prague calendar day and that every
 subsequent result is retained. The CLI always labels external publication as
 requiring verification; it does not treat a local timestamp as an attestation.
+Use trusted hosting activity/receipt times, not user-editable Git author or
+committer dates, to check advance publication.
 The numerical threshold is conditional on this prospective timing and valid
 data, not a substitute for checking them.
 

@@ -66,7 +66,9 @@ def test_every_factor_has_unit_null_expectation_even_after_past_adaptation(tilt)
         for second in draws:
             h2 = len(set(second) & forecast2)
             products.append(math.exp(p.log_factor(h1, tilt, 8, 3) + p.log_factor(h2, tilt, 8, 3)))
-    assert sum(products) / len(products) == pytest.approx(1., abs=2e-14)
+    # Python <3.12 sum accumulates enough rounding error across 3,136 paths to
+    # exceed this tolerance. Use a precise reference sum on every interpreter.
+    assert math.fsum(products) / len(products) == pytest.approx(1., abs=2e-14)
 
 
 def test_mixture_is_valid_with_perfectly_dependent_games_and_models():
