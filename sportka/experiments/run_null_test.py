@@ -88,7 +88,8 @@ MS_ALPHA = 0.5
 MS_N = 7
 MS_INCLUDE_RAW = True
 
-METRIC_COLS = ["bce", "recall_at_6", "recall_at_10", "kl_vs_uniform", "avg_hits_6", "avg_hits_10"]
+METRIC_COLS = ["bce", "conditional_set_nll", "conditional_set_gain_vs_uniform",
+               "recall_at_6", "recall_at_10", "kl_vs_uniform", "avg_hits_6", "avg_hits_10"]
 
 # Theoretical random baseline under uniform draw (six main numbers, top-k selection)
 RANDOM_RECALL_6 = 6 / 49   # ≈ 0.1224
@@ -401,7 +402,11 @@ def _write_report(
         row = [f"**{cond}**"] + [_fmt(m[k]) for k in METRIC_COLS]
         a("| " + " | ".join(row) + " |")
     a("")
-    a("**Theoretical random baseline** (7 drawn, top-6 selected):")
+    a("`conditional_set_nll` is whole-six-set NLL in nats/draw after conditioning independent scores on six balls; lower is better.")
+    a("`conditional_set_gain_vs_uniform` is uniform NLL minus conditioned NLL. It is descriptive and does not change the exploratory decision rule.")
+    a("Conditioning uses a fixed 1e-9 boundary clip and changes the implied marginals; raw BCE is retained. See docs/sportka_exact_six.md.")
+    a("")
+    a("**Theoretical random baseline** (6 main balls drawn, top-6 selected):")
     a(f"  `recall@6 ≈ {RANDOM_RECALL_6:.4f}`, `avg_hits_6 ≈ {RANDOM_HITS_6:.4f}`")
     a("")
     a("---")

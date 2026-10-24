@@ -63,6 +63,7 @@ tickets, connects to a gambling account, or increases a budget automatically.
 
 - [Usage](USAGE.md): commands, CSV format, budget validation and error handling
 - [Technical notes](sportka/README.md): rules, causal evaluation and limitations
+- [Exact six-set scoring](docs/sportka_exact_six.md): normalized set likelihoods for existing model outputs
 - [Repair summary](IMPLEMENTATION_SUMMARY.md): bugs fixed and verification scope
 - [Real-data baseline check](reports/sportka_baseline_2026-10-22.md): both draws, 3,821 dates
 - [Historical reports](reports/README.md): archived experiments requiring reruns

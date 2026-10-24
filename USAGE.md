@@ -100,6 +100,14 @@ selected six-number column. Equal scores use a fixed numerical tie ordering.
 Prize amounts and profit are not estimated. A 5+ main-hit rate does not
 distinguish the separate 5+bonus tier.
 
+The same report includes `conditional_set_nll` and
+`conditional_set_gain_vs_uniform`: log scores for the complete observed six-set
+after conditioning independent model outputs on six balls. Conditional marginal
+BCE/Brier use the resulting inclusion probabilities; raw BCE/Brier are retained.
+The JSON names the fixed clipping rule and score version. See
+[the method and limits](docs/sportka_exact_six.md). Positive historical gain is
+descriptive and has no significance or profitability guarantee.
+
 Use synthetic data explicitly for diagnostics:
 
 ```bash

@@ -355,7 +355,8 @@ def _write_report(
     a("## Model Comparison — Test Set")
     a("")
     # Build comparison table
-    metric_cols = ["bce", "recall_at_6", "recall_at_10", "kl_vs_uniform", "avg_hits_6"]
+    metric_cols = ["bce", "conditional_set_nll", "conditional_set_gain_vs_uniform",
+                   "recall_at_6", "recall_at_10", "kl_vs_uniform", "avg_hits_6"]
     header = "| Model | Features | n_feat | " + " | ".join(metric_cols) + " |"
     sep    = "|-------|----------|--------|" + "|".join(["--------"] * len(metric_cols)) + "|"
     a(header)
@@ -371,6 +372,9 @@ def _write_report(
     a("")
     a("**Metrics:**")
     a("- `bce`: binary cross-entropy (lower = better)")
+    a("- `conditional_set_nll`: whole-six-set NLL after conditioning independent scores on six balls (nats/draw; lower = better)")
+    a("- `conditional_set_gain_vs_uniform`: uniform NLL minus conditioned NLL; descriptive, without a significance test")
+    a("Conditioning uses a fixed 1e-9 boundary clip and changes the implied marginals; raw BCE is retained. See docs/sportka_exact_six.md.")
     a("- `recall_at_6`: fraction of drawn numbers recovered in top-6 predictions (higher = better)")
     a("- `recall_at_10`: same for top-10")
     a("- `kl_vs_uniform`: KL divergence of predictions from uniform distribution")
