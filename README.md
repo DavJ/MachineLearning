@@ -80,6 +80,12 @@ mixture of sequential tests accounts for the registered models and repeated
 inspection. Forecasts and protocol must be published before their target day;
 the initial ledger has no scored prospective results.
 
+[Joint-set recovery controls](docs/sportka_joint_recovery.md) fit simple complete
+six-set distributions and test recovery of known synthetic number, pair and
+copy signals. Whole-pipeline null simulations include training searches and
+validation selection. This exploratory experiment leaves the prospective
+protocol unchanged and does not establish a betting advantage.
+
 ## Finance
 
 The `finance/` directory contains separate Binance, Alpha Vantage and Kalman filter
