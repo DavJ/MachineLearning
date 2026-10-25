@@ -1,0 +1,220 @@
+{
+  "target_date": "2026-10-25",
+  "checked_at_prague": "2026-10-25T21:26:52.365017+01:00",
+  "source": {
+    "url": "https://www.allwyn.cz/loterie/historie-cisel?game=sportka",
+    "http_response_date": "Sun, 25 Oct 2026 20:26:52 GMT",
+    "sha256": "8c90255d3b6b78efa86c0f7d106f9140dbae752bf37c1119e7769b5c20885315",
+    "dates_per_game": 3823,
+    "through": "2026-10-25"
+  },
+  "advance_publication": {
+    "status": "VERIFIED_FROM_GITHUB_PR_MERGE_EVENT_AND_MERGED_FILE",
+    "url": "https://github.com/DavJ/MachineLearning/pull/18",
+    "merged_at_utc": "2026-10-23T20:23:26+00:00",
+    "merge_commit": "1fcbabec14aa22bf042e5e13d072656496e1f814",
+    "forecast_ledger_blob_sha": "944a210ae8ff5563dbb67b4576696c0dbcb1ab13",
+    "merged_ledger_matches_original_protocol_and_event": true,
+    "deadline_prague": "2026-10-25T00:00:00+02:00",
+    "deadline_utc": "2026-10-24T22:00:00+00:00"
+  },
+  "observed_main": {
+    "1": [
+      3,
+      9,
+      14,
+      23,
+      25,
+      45
+    ],
+    "2": [
+      11,
+      27,
+      33,
+      35,
+      43,
+      45
+    ]
+  },
+  "observed_bonus": {
+    "1": 8,
+    "2": 4
+  },
+  "registered_comparisons": {
+    "frequency_all": {
+      "1": {
+        "prediction": [
+          6,
+          18,
+          20,
+          29,
+          30,
+          47
+        ],
+        "matched": [],
+        "main_hits": 0
+      },
+      "2": {
+        "prediction": [
+          12,
+          13,
+          23,
+          36,
+          40,
+          44
+        ],
+        "matched": [],
+        "main_hits": 0
+      }
+    },
+    "frequency_52": {
+      "1": {
+        "prediction": [
+          9,
+          11,
+          13,
+          27,
+          29,
+          42
+        ],
+        "matched": [
+          9
+        ],
+        "main_hits": 1
+      },
+      "2": {
+        "prediction": [
+          1,
+          5,
+          20,
+          22,
+          40,
+          42
+        ],
+        "matched": [],
+        "main_hits": 0
+      }
+    },
+    "previous_draw": {
+      "1": {
+        "prediction": [
+          17,
+          21,
+          30,
+          38,
+          41,
+          43
+        ],
+        "matched": [],
+        "main_hits": 0
+      },
+      "2": {
+        "prediction": [
+          3,
+          11,
+          15,
+          30,
+          41,
+          47
+        ],
+        "matched": [
+          11
+        ],
+        "main_hits": 1
+      }
+    }
+  },
+  "additional_cross_draw_hit_counts": {
+    "frequency_all": {
+      "1": {
+        "1": 0,
+        "2": 0
+      },
+      "2": {
+        "1": 1,
+        "2": 0
+      }
+    },
+    "frequency_52": {
+      "1": {
+        "1": 1,
+        "2": 2
+      },
+      "2": {
+        "1": 0,
+        "2": 0
+      }
+    },
+    "previous_draw": {
+      "1": {
+        "1": 0,
+        "2": 1
+      },
+      "2": {
+        "1": 1,
+        "2": 1
+      }
+    }
+  },
+  "cross_draw_note": "Descriptive ticket checks against both draws; not additional experts in the registered e-process. Best is frequency_52 game-1 set against draw 2, matching 11 and 27.",
+  "independent_checks": {
+    "method": "stdlib CSV parse, set intersections, exact hypergeometric probabilities and 42-factor arithmetic mean",
+    "reference_e_value": 0.8757266078490185,
+    "absolute_difference_e_value": 2.220446049250313e-16,
+    "forecast_and_protocol_preserved": true,
+    "all_registered_sets_against_both_draws_max_hits": 2
+  },
+  "result_event_hash": "10954ebe8f419b31f80d9a5a067b7a9931027b08703743a94f7b48b9e3582b7b",
+  "forecast_event_hash": "912cddc298f8021c948cc569b1d01e2b9a427c71d5f5430e90700996478b6a09",
+  "status": {
+    "protocol": "sportka-prospective-v1",
+    "scored_dates": 1,
+    "expert_count": 42,
+    "null_expected_hits_per_game": 0.7346938775510204,
+    "log_e_value": -0.13270132825298633,
+    "e_value": 0.8757266078490182,
+    "running_max_log_e_value": 0.0,
+    "log_anytime_p_bound": -0.0,
+    "anytime_p_bound": 1.0,
+    "rejection_threshold": 20.0,
+    "verdict": "NO_PROSPECTIVE_EVIDENCE",
+    "prediction_edge": "NOT_ESTABLISHED",
+    "external_publication": "MUST_BE_VERIFIED_IN_VERSION_HISTORY",
+    "mean_hits": {
+      "frequency_all": {
+        "1": 0.0,
+        "2": 0.0
+      },
+      "frequency_52": {
+        "1": 1.0,
+        "2": 0.0
+      },
+      "previous_draw": {
+        "1": 0.0,
+        "2": 1.0
+      }
+    },
+    "trajectory": [
+      {
+        "target_date": "2026-10-25",
+        "hits": {
+          "frequency_all": {
+            "1": 0,
+            "2": 0
+          },
+          "frequency_52": {
+            "1": 1,
+            "2": 0
+          },
+          "previous_draw": {
+            "1": 0,
+            "2": 1
+          }
+        },
+        "log_e_value": -0.13270132825298633
+      }
+    ],
+    "pending_forecast": null
+  },
+  "interpretation": "One scored date; no prospective evidence of a predictive or profit advantage; no new forecast or protocol reset"
+}

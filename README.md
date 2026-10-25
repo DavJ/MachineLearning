@@ -79,7 +79,8 @@ diagnostics and synthetic detector checks, not a demonstrated betting edge.
 for both main draws before a future date and score only new results. A fixed
 mixture of sequential tests accounts for the registered models and repeated
 inspection. Forecasts and protocol must be published before their target day;
-the initial ledger has no scored prospective results.
+the [first scored date](reports/sportka_prospective_2026-10-25.md) provides no
+prospective evidence of an advantage.
 
 ## Finance
 
