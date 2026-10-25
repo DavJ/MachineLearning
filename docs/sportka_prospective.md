@@ -125,4 +125,5 @@ committer dates, to check advance publication.
 The numerical threshold is conditional on this prospective timing and valid
 data, not a substitute for checking them.
 
-[First sealed forecast and current initial status](../reports/sportka_prospective_2026-10-23.md).
+[First sealed forecast](../reports/sportka_prospective_2026-10-23.md) and
+[first scored result, 25 October](../reports/sportka_prospective_2026-10-25.md).
