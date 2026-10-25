@@ -1,0 +1,506 @@
+{
+  "report_date": "2026-10-24",
+  "purpose": "Descriptive re-scoring of existing fixed models; no new hypothesis test or betting selection",
+  "prediction_edge": "NOT_ESTABLISHED",
+  "verdict": "ALL_THREE_NONUNIFORM_MODELS_HAVE_WORSE_TEST_SET_NLL_IN_BOTH_GAMES",
+  "source_snapshot": {
+    "url": "https://www.allwyn.cz/loterie/historie-cisel?game=sportka",
+    "provenance": "Reuse the frozen official export already validated for the 2026-10-23 prospective issue; no new download",
+    "sha256": "ff89e477192390abfb0ae81892ae824c1eaeefa6e86dc90204949863358f2cbd",
+    "dates_per_game": 3822,
+    "date_range": [
+      "1994-01-09",
+      "2026-10-23"
+    ]
+  },
+  "base_commit": "1fcbabec14aa22bf042e5e13d072656496e1f814",
+  "implementation_sha256": {
+    "sportka/fixed_cardinality.py": "7648e3fad68bdb906bf5b6e1f324b40e6e761e60745c45682a218efa5aceca06",
+    "sportka/evaluation.py": "ad0fa0e500fc77cd117d82c531621f4582a9d0b921355185d13b7382121edd2c",
+    "sportka/cli.py": "aacea4e558540854cc58128b3fd36d26f8e823497210d0987bebe42560e3a5ad",
+    "sportka/models.py": "0aa82521c372e034c181268f3c907487e2858074a94a61bdc9e91067af7ad366",
+    "sportka/features.py": "eafb7ccda3b0ba0a46097b90403462a24121343b311279e21e4c0df4b4ff1062",
+    "sportka/data.py": "5b8a1424f5d85495c39cbfdd2224329b63e08a1c822cfd825190c12fc5ed98c0"
+  },
+  "runtime": {
+    "python": "3.12.14",
+    "numpy": "2.3.5",
+    "pandas": "2.2.3",
+    "scikit-learn": "1.8.0"
+  },
+  "protocol": {
+    "split": "Existing chronological 70/15/15 split by target date, all held-out targets retained",
+    "target_dates": {
+      "train": [
+        "1994-01-16",
+        "2019-02-24"
+      ],
+      "validation": [
+        "2019-02-27",
+        "2023-02-24"
+      ],
+      "test": [
+        "2023-02-26",
+        "2026-10-23"
+      ]
+    },
+    "model_fit": "Training rows only; validation/test use actual earlier observations; no refit or selection",
+    "feature_groups": [
+      "base",
+      "time",
+      "winding"
+    ],
+    "models": {
+      "random_uniform": "All raw scores 6/49",
+      "global_frequency": "Training-target main-ball inclusion frequencies",
+      "rolling_frequency": "Existing first rolling feature block, window=1; raw scores zero/one repeat the preceding draw",
+      "logistic_regression": {
+        "C": 0.1,
+        "max_iter": 200,
+        "solver": "saga",
+        "random_state": 0,
+        "constant_labels": "Training prior preserved"
+      }
+    },
+    "hypothesis_tests": "None; old history has already been explored; no corrected p-values or prospective inference",
+    "prospective_ledger": "Byte-identical to master; 2026-10-25 pending, zero scored dates"
+  },
+  "independent_real_checks": [
+    {
+      "game": 1,
+      "model": "random_uniform",
+      "independent_set_nll": 16.453411218896154,
+      "absolute_error": 0.0,
+      "target_dates": [
+        "2023-02-26",
+        "2026-10-23"
+      ]
+    },
+    {
+      "game": 1,
+      "model": "global_frequency",
+      "independent_set_nll": 16.469399957468326,
+      "absolute_error": 0.0,
+      "target_dates": [
+        "2023-02-26",
+        "2026-10-23"
+      ]
+    },
+    {
+      "game": 1,
+      "model": "rolling_frequency",
+      "independent_set_nll": 216.40288415579047,
+      "absolute_error": 5.684341886080802e-14,
+      "target_dates": [
+        "2023-02-26",
+        "2026-10-23"
+      ]
+    },
+    {
+      "game": 2,
+      "model": "random_uniform",
+      "independent_set_nll": 16.453411218896154,
+      "absolute_error": 0.0,
+      "target_dates": [
+        "2023-02-26",
+        "2026-10-23"
+      ]
+    },
+    {
+      "game": 2,
+      "model": "global_frequency",
+      "independent_set_nll": 16.470577316553587,
+      "absolute_error": 0.0,
+      "target_dates": [
+        "2023-02-26",
+        "2026-10-23"
+      ]
+    },
+    {
+      "game": 2,
+      "model": "rolling_frequency",
+      "independent_set_nll": 217.9914271826264,
+      "absolute_error": 0.0,
+      "target_dates": [
+        "2023-02-26",
+        "2026-10-23"
+      ]
+    }
+  ],
+  "verification": {
+    "local_pytest": "160 passed, 3 skipped (optional TensorFlow), 4 existing plotting warnings",
+    "new_tests": 41,
+    "enumeration": "Independent Bernoulli products for every outcome of an 8-ball lottery at counts 0,1,3,7,8",
+    "other_checks": [
+      "Closed-form one-favored-ball 6-of-49 likelihood and marginal",
+      "Common odds scaling and row/ball permutation invariance",
+      "Input mutation, batch isolation and finite float32 boundary scores",
+      "CLI and v1/v2/null report integration",
+      "Independent CSV targets and probability-domain normalizer match six real baseline/game results within 5.7e-14 nats/draw"
+    ]
+  },
+  "games": [
+    {
+      "notice": "Fair independent draws cannot be predicted from past results. These tickets have no demonstrated predictive edge. Jackpot odds below exclude \u0160ance and Superjackpot.",
+      "source": {
+        "kind": "csv",
+        "sha256": "ff89e477192390abfb0ae81892ae824c1eaeefa6e86dc90204949863358f2cbd",
+        "game": 1
+      },
+      "draw_count": 3822,
+      "date_range": [
+        "1994-01-09",
+        "2026-10-23"
+      ],
+      "split_pairs": {
+        "train": 2674,
+        "validation": 573,
+        "test": 574
+      },
+      "expected_random_hits_per_line": 0.7346938775510204,
+      "expected_random_jackpot_rate": 7.151123842018516e-08,
+      "selection": "Fixed models; no test-set tuning or automatic betting recommendation",
+      "conditional_score_protocol": {
+        "version": "conditional-bernoulli-v1",
+        "law": "Independent Bernoulli scores conditioned on exactly six main balls",
+        "probability_clip": 1e-09,
+        "set_score_units": "Natural log units per complete draw; lower NLL is better",
+        "gain": "Uniform set NLL minus model set NLL; positive is descriptive, not evidence of an edge",
+        "marginals": "conditional_bce/brier use implied marginals; bce/brier retain raw scores"
+      },
+      "tie_policy": "Equal probability scores use a fixed numerical ordering for top-k metrics",
+      "profit": "Not estimated: actual payouts, costs, and jackpot sharing are not supplied",
+      "results": {
+        "random_uniform": {
+          "validation": {
+            "bce": 0.3717761799434528,
+            "brier": 0.10745522379875183,
+            "recall_at_6": 0.11721931355439207,
+            "recall_at_10": 0.19575334496800467,
+            "kl_vs_uniform": 0.0,
+            "avg_hits_6": 0.7033158813263525,
+            "avg_hits_10": 1.174520069808028,
+            "ticket_3plus_rate": 0.017452006980802792,
+            "ticket_4plus_rate": 0.0,
+            "ticket_5plus_rate": 0.0,
+            "ticket_6_rate": 0.0,
+            "conditional_set_nll": 16.453411218896154,
+            "conditional_set_gain_vs_uniform": -3.552713678800501e-15,
+            "conditional_bce": 0.3717761799434528,
+            "conditional_brier": 0.10745522698875469
+          },
+          "test": {
+            "bce": 0.37177617994345286,
+            "brier": 0.10745521634817123,
+            "recall_at_6": 0.12688734030197443,
+            "recall_at_10": 0.2105110336817654,
+            "kl_vs_uniform": 0.0,
+            "avg_hits_6": 0.7613240418118467,
+            "avg_hits_10": 1.2630662020905923,
+            "ticket_3plus_rate": 0.012195121951219513,
+            "ticket_4plus_rate": 0.0,
+            "ticket_5plus_rate": 0.0,
+            "ticket_6_rate": 0.0,
+            "conditional_set_nll": 16.453411218896154,
+            "conditional_set_gain_vs_uniform": -3.552713678800501e-15,
+            "conditional_bce": 0.3717761799434528,
+            "conditional_brier": 0.1074552269887547
+          },
+          "test_bce_minus_uniform": 0.0
+        },
+        "global_frequency": {
+          "validation": {
+            "bce": 0.3718218001257142,
+            "brier": 0.10746490955352783,
+            "recall_at_6": 0.12536358347876672,
+            "recall_at_10": 0.21465968586387435,
+            "kl_vs_uniform": 0.0013254379690879102,
+            "avg_hits_6": 0.7521815008726004,
+            "avg_hits_10": 1.287958115183246,
+            "ticket_3plus_rate": 0.019197207678883072,
+            "ticket_4plus_rate": 0.0017452006980802793,
+            "ticket_5plus_rate": 0.0,
+            "ticket_6_rate": 0.0,
+            "conditional_set_nll": 16.455832953423087,
+            "conditional_set_gain_vs_uniform": -0.0024217345269370583,
+            "conditional_bce": 0.37182662024640106,
+            "conditional_brier": 0.107465930265749
+          },
+          "test": {
+            "bce": 0.3720986777592903,
+            "brier": 0.1075228601694107,
+            "recall_at_6": 0.12746806039488964,
+            "recall_at_10": 0.1997677119628339,
+            "kl_vs_uniform": 0.0013254379690879102,
+            "avg_hits_6": 0.764808362369338,
+            "avg_hits_10": 1.1986062717770034,
+            "ticket_3plus_rate": 0.036585365853658534,
+            "ticket_4plus_rate": 0.0,
+            "ticket_5plus_rate": 0.0,
+            "ticket_6_rate": 0.0,
+            "conditional_set_nll": 16.469399957468326,
+            "conditional_set_gain_vs_uniform": -0.015988738572175976,
+            "conditional_bce": 0.372109109419818,
+            "conditional_brier": 0.10752503433505207
+          },
+          "test_bce_minus_uniform": 0.0003224978158374303
+        },
+        "rolling_frequency": {
+          "validation": {
+            "bce": 4.453616346743035,
+            "brier": 0.21490900218486786,
+            "recall_at_6": 0.12245491564863291,
+            "recall_at_10": 0.20040721349621873,
+            "kl_vs_uniform": 16.085662259686046,
+            "avg_hits_6": 0.7347294938917975,
+            "avg_hits_10": 1.2024432809773125,
+            "ticket_3plus_rate": 0.02443280977312391,
+            "ticket_4plus_rate": 0.0017452006980802793,
+            "ticket_5plus_rate": 0.0,
+            "ticket_6_rate": 0.0,
+            "conditional_set_nll": 218.2272009414087,
+            "conditional_set_gain_vs_uniform": -201.77378972251256,
+            "conditional_bce": 4.453616346743035,
+            "conditional_brier": 0.2149090002493144
+          },
+          "test": {
+            "bce": 4.416385391934498,
+            "brier": 0.21311242878437042,
+            "recall_at_6": 0.1297909407665505,
+            "recall_at_10": 0.21080139372822299,
+            "kl_vs_uniform": 16.085662259686046,
+            "avg_hits_6": 0.7787456445993032,
+            "avg_hits_10": 1.264808362369338,
+            "ticket_3plus_rate": 0.02264808362369338,
+            "ticket_4plus_rate": 0.0,
+            "ticket_5plus_rate": 0.0,
+            "ticket_6_rate": 0.0,
+            "conditional_set_nll": 216.40288415579042,
+            "conditional_set_gain_vs_uniform": -199.94947293689427,
+            "conditional_bce": 4.416385391934498,
+            "conditional_brier": 0.21311242266941618
+          },
+          "test_bce_minus_uniform": 4.0446092119910455
+        },
+        "logistic_regression": {
+          "validation": {
+            "bce": 0.3835625108426582,
+            "brier": 0.11009247601032257,
+            "recall_at_6": 0.11809191390343221,
+            "recall_at_10": 0.20593368237347293,
+            "kl_vs_uniform": 0.0857096922048332,
+            "avg_hits_6": 0.7085514834205934,
+            "avg_hits_10": 1.2356020942408377,
+            "ticket_3plus_rate": 0.017452006980802792,
+            "ticket_4plus_rate": 0.0,
+            "ticket_5plus_rate": 0.0,
+            "ticket_6_rate": 0.0,
+            "conditional_set_nll": 17.042783142041532,
+            "conditional_set_gain_vs_uniform": -0.5893719231453822,
+            "conditional_bce": 0.3840744035239622,
+            "conditional_brier": 0.11018850371798579
+          },
+          "test": {
+            "bce": 0.3826326950940257,
+            "brier": 0.1099071055650711,
+            "recall_at_6": 0.12282229965156795,
+            "recall_at_10": 0.20499419279907083,
+            "kl_vs_uniform": 0.08853447285744798,
+            "avg_hits_6": 0.7369337979094077,
+            "avg_hits_10": 1.2299651567944252,
+            "ticket_3plus_rate": 0.020905923344947737,
+            "ticket_4plus_rate": 0.0,
+            "ticket_5plus_rate": 0.0,
+            "ticket_6_rate": 0.0,
+            "conditional_set_nll": 16.997497642746946,
+            "conditional_set_gain_vs_uniform": -0.5440864238507963,
+            "conditional_bce": 0.3831312485687082,
+            "conditional_brier": 0.10998764414520093
+          },
+          "test_bce_minus_uniform": 0.010856515150572843
+        }
+      }
+    },
+    {
+      "notice": "Fair independent draws cannot be predicted from past results. These tickets have no demonstrated predictive edge. Jackpot odds below exclude \u0160ance and Superjackpot.",
+      "source": {
+        "kind": "csv",
+        "sha256": "ff89e477192390abfb0ae81892ae824c1eaeefa6e86dc90204949863358f2cbd",
+        "game": 2
+      },
+      "draw_count": 3822,
+      "date_range": [
+        "1994-01-09",
+        "2026-10-23"
+      ],
+      "split_pairs": {
+        "train": 2674,
+        "validation": 573,
+        "test": 574
+      },
+      "expected_random_hits_per_line": 0.7346938775510204,
+      "expected_random_jackpot_rate": 7.151123842018516e-08,
+      "selection": "Fixed models; no test-set tuning or automatic betting recommendation",
+      "conditional_score_protocol": {
+        "version": "conditional-bernoulli-v1",
+        "law": "Independent Bernoulli scores conditioned on exactly six main balls",
+        "probability_clip": 1e-09,
+        "set_score_units": "Natural log units per complete draw; lower NLL is better",
+        "gain": "Uniform set NLL minus model set NLL; positive is descriptive, not evidence of an edge",
+        "marginals": "conditional_bce/brier use implied marginals; bce/brier retain raw scores"
+      },
+      "tie_policy": "Equal probability scores use a fixed numerical ordering for top-k metrics",
+      "profit": "Not estimated: actual payouts, costs, and jackpot sharing are not supplied",
+      "results": {
+        "random_uniform": {
+          "validation": {
+            "bce": 0.3717761799434529,
+            "brier": 0.10745522379875183,
+            "recall_at_6": 0.1227457824316463,
+            "recall_at_10": 0.21087841768470042,
+            "kl_vs_uniform": 0.0,
+            "avg_hits_6": 0.7364746945898778,
+            "avg_hits_10": 1.2652705061082024,
+            "ticket_3plus_rate": 0.015706806282722512,
+            "ticket_4plus_rate": 0.0017452006980802793,
+            "ticket_5plus_rate": 0.0,
+            "ticket_6_rate": 0.0,
+            "conditional_set_nll": 16.453411218896154,
+            "conditional_set_gain_vs_uniform": -3.552713678800501e-15,
+            "conditional_bce": 0.3717761799434528,
+            "conditional_brier": 0.10745522698875469
+          },
+          "test": {
+            "bce": 0.3717761799434528,
+            "brier": 0.10745521634817123,
+            "recall_at_6": 0.12659698025551683,
+            "recall_at_10": 0.2081881533101045,
+            "kl_vs_uniform": 0.0,
+            "avg_hits_6": 0.759581881533101,
+            "avg_hits_10": 1.2491289198606272,
+            "ticket_3plus_rate": 0.024390243902439025,
+            "ticket_4plus_rate": 0.0,
+            "ticket_5plus_rate": 0.0,
+            "ticket_6_rate": 0.0,
+            "conditional_set_nll": 16.453411218896154,
+            "conditional_set_gain_vs_uniform": -3.552713678800501e-15,
+            "conditional_bce": 0.37177617994345286,
+            "conditional_brier": 0.1074552269887547
+          },
+          "test_bce_minus_uniform": 0.0
+        },
+        "global_frequency": {
+          "validation": {
+            "bce": 0.37194818281631825,
+            "brier": 0.10749220103025436,
+            "recall_at_6": 0.12245491564863294,
+            "recall_at_10": 0.20360674810936588,
+            "kl_vs_uniform": 0.0015833619114729374,
+            "avg_hits_6": 0.7347294938917975,
+            "avg_hits_10": 1.2216404886561956,
+            "ticket_3plus_rate": 0.02617801047120419,
+            "ticket_4plus_rate": 0.0,
+            "ticket_5plus_rate": 0.0,
+            "ticket_6_rate": 0.0,
+            "conditional_set_nll": 16.46206206596141,
+            "conditional_set_gain_vs_uniform": -0.008650847065258205,
+            "conditional_bce": 0.37195640807083136,
+            "conditional_brier": 0.10749395487057228
+          },
+          "test": {
+            "bce": 0.3721219634406484,
+            "brier": 0.10752873867750168,
+            "recall_at_6": 0.12398373983739835,
+            "recall_at_10": 0.2032520325203252,
+            "kl_vs_uniform": 0.0015833619114729374,
+            "avg_hits_6": 0.7439024390243902,
+            "avg_hits_10": 1.2195121951219512,
+            "ticket_3plus_rate": 0.02613240418118467,
+            "ticket_4plus_rate": 0.0,
+            "ticket_5plus_rate": 0.0,
+            "ticket_6_rate": 0.0,
+            "conditional_set_nll": 16.470577316553587,
+            "conditional_set_gain_vs_uniform": -0.017166097657437263,
+            "conditional_bce": 0.37213372804364164,
+            "conditional_brier": 0.10753122744314571
+          },
+          "test_bce_minus_uniform": 0.0003457834971956064
+        },
+        "rolling_frequency": {
+          "validation": {
+            "bce": 4.475758953699001,
+            "brier": 0.2159774899482727,
+            "recall_at_6": 0.11809191390343221,
+            "recall_at_10": 0.19982547993019198,
+            "kl_vs_uniform": 16.085662259686046,
+            "avg_hits_6": 0.7085514834205934,
+            "avg_hits_10": 1.198952879581152,
+            "ticket_3plus_rate": 0.02617801047120419,
+            "ticket_4plus_rate": 0.0,
+            "ticket_5plus_rate": 0.0,
+            "ticket_6_rate": 0.0,
+            "conditional_set_nll": 219.312188682251,
+            "conditional_set_gain_vs_uniform": -202.85877746335484,
+            "conditional_bce": 4.475758953699001,
+            "conditional_brier": 0.21597749047262885
+          },
+          "test": {
+            "bce": 4.448804637380131,
+            "brier": 0.21467681229114532,
+            "recall_at_6": 0.12340301974448314,
+            "recall_at_10": 0.2073170731707317,
+            "kl_vs_uniform": 16.085662259686046,
+            "avg_hits_6": 0.740418118466899,
+            "avg_hits_10": 1.2439024390243902,
+            "ticket_3plus_rate": 0.017421602787456445,
+            "ticket_4plus_rate": 0.0,
+            "ticket_5plus_rate": 0.0,
+            "ticket_6_rate": 0.0,
+            "conditional_set_nll": 217.9914271826264,
+            "conditional_set_gain_vs_uniform": -201.53801596373026,
+            "conditional_bce": 4.448804637380131,
+            "conditional_brier": 0.21467681149114698
+          },
+          "test_bce_minus_uniform": 4.077028457436678
+        },
+        "logistic_regression": {
+          "validation": {
+            "bce": 0.3839905341572549,
+            "brier": 0.11008211970329285,
+            "recall_at_6": 0.12420011634671319,
+            "recall_at_10": 0.20826061663757997,
+            "kl_vs_uniform": 0.08919913715303347,
+            "avg_hits_6": 0.7452006980802792,
+            "avg_hits_10": 1.24956369982548,
+            "ticket_3plus_rate": 0.015706806282722512,
+            "ticket_4plus_rate": 0.0034904013961605585,
+            "ticket_5plus_rate": 0.0,
+            "ticket_6_rate": 0.0,
+            "conditional_set_nll": 17.06414975173014,
+            "conditional_set_gain_vs_uniform": -0.6107385328339916,
+            "conditional_bce": 0.3845087295838252,
+            "conditional_brier": 0.11016795338086698
+          },
+          "test": {
+            "bce": 0.38492346221469237,
+            "brier": 0.11042185872793198,
+            "recall_at_6": 0.12020905923344945,
+            "recall_at_10": 0.19628339140534262,
+            "kl_vs_uniform": 0.09234598214928944,
+            "avg_hits_6": 0.7212543554006968,
+            "avg_hits_10": 1.1777003484320558,
+            "ticket_3plus_rate": 0.012195121951219513,
+            "ticket_4plus_rate": 0.0017421602787456446,
+            "ticket_5plus_rate": 0.0017421602787456446,
+            "ticket_6_rate": 0.0,
+            "conditional_set_nll": 17.110274836168895,
+            "conditional_set_gain_vs_uniform": -0.6568636172727444,
+            "conditional_bce": 0.3854846634408888,
+            "conditional_brier": 0.11051036266139434
+          },
+          "test_bce_minus_uniform": 0.013147282271239569
+        }
+      }
+    }
+  ]
+}

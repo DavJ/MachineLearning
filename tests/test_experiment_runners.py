@@ -31,7 +31,9 @@ def test_runners_use_all_heldout_targets_and_write_report(tmp_path, monkeypatch,
     for result in results.values():
         assert len(result["Y_test"]) == 6
         assert (result["Y_test"].sum(axis=1) == 6).all()
-    assert list((tmp_path / "reports").glob("*.md"))
+    reports = list((tmp_path / "reports").glob("*.md"))
+    assert reports
+    assert "conditional_set_nll" in reports[0].read_text()
 
 
 def test_null_screen_never_labels_worse_performance_as_signal():

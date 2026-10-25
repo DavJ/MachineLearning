@@ -27,6 +27,11 @@ def test_explicit_synthetic_backtest_labels_source_and_all_targets():
     assert report["source"]["kind"] == "synthetic_null"
     assert sum(report["split_pairs"].values()) == 39
     assert "Not estimated" in report["profit"]
+    assert report["conditional_score_protocol"]["version"] == "conditional-bernoulli-v1"
+    for result in report["results"].values():
+        assert "conditional_set_nll" in result["validation"]
+        assert "conditional_set_gain_vs_uniform" in result["test"]
+    assert report["results"]["random_uniform"]["test"]["conditional_set_gain_vs_uniform"] == pytest.approx(0., abs=1e-12)
 
 
 @pytest.mark.parametrize("args", [("backtest", "--csv", "/does/not/exist.csv"),

@@ -16,6 +16,7 @@ import pandas as pd
 from typing import Dict, List, Tuple, Callable
 
 from sportka.features import build_features, walk_forward_split
+from sportka.fixed_cardinality import conditional_set_metrics
 from sportka.rules import MAIN_COUNT, POOL_SIZE
 
 
@@ -115,10 +116,12 @@ def avg_hits(y_true: np.ndarray, y_pred: np.ndarray, k: int = 6) -> float:
 def compute_all_metrics(
     y_true: np.ndarray, y_pred: np.ndarray
 ) -> Dict[str, float]:
-    """Compute probability scores and six-number ticket hit rates.
+    """Compute raw/conditioned scores and six-number ticket hit rates.
 
     Hit rates do not represent profit: payout amounts and shared jackpots
     are absent. The bonus tier requires the separate bonus-ball column.
+    The conditional_* scores explicitly condition a clipped independent
+    Bernoulli law on six balls; they do not claim raw scores are calibrated.
     """
     if y_true.shape != y_pred.shape or y_true.ndim != 2 or y_true.shape[1] != POOL_SIZE or not len(y_true):
         raise ValueError("Expected matching nonempty (n, 49) truth and prediction arrays")
@@ -140,6 +143,7 @@ def compute_all_metrics(
         "ticket_4plus_rate": float(np.mean(hits >= 4)),
         "ticket_5plus_rate": float(np.mean(hits >= 5)),
         "ticket_6_rate": float(np.mean(hits == 6)),
+        **conditional_set_metrics(y_true, y_pred),
     }
 
 
