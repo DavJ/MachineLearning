@@ -1,0 +1,58 @@
+name: Sportka real-history theta-grid evaluation
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'sportka/experiments/theta_grid_benchmark.py'
+      - '.github/workflows/sportka-grid-real-data.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        game: [1, 2]
+    env:
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '42'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - run: python -m pip install -r requirements-sportka.txt
+      - name: Fetch and validate current official historical CSV
+        run: python sportka_launcher.py download --directory data
+      - name: Benchmark fixed grid against uniform probabilities
+        run: |
+          mkdir -p benchmark-results
+          python -m sportka.experiments.theta_grid_benchmark --csv data/sportka.csv --game ${{ matrix.game }} > benchmark-results/grid_game_${{ matrix.game }}.json
+          python - <<'PY'
+          import json, os
+          game = os.environ['GAME']
+          with open(f'benchmark-results/grid_game_{game}.json') as f:
+              r = json.load(f)
+          print('Allwyn CSV SHA256:', r['source_sha256'])
+          print('Draw:', r['game'], 'test dates:', r['test_dates'])
+          for name in ('theta_grid', 'uniform'):
+              print(name, 'BCE:', r[name]['test']['bce'],
+                    'Brier:', r[name]['test']['brier'],
+                    'mean hits:', r[name]['test']['avg_hits_6'])
+          print('Iteration limit reached:', r['iteration_limit_reached'])
+          PY
+        env:
+          GAME: ${{ matrix.game }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: theta-grid-game-${{ matrix.game }}
+          path: benchmark-results/
+          retention-days: 30

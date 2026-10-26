@@ -1,0 +1,455 @@
+{
+  "checked_on": "2026-10-23",
+  "source_url": "https://www.allwyn.cz/loterie/historie-cisel?game=sportka",
+  "protocol": "Fixed hidden=32, max_iter=150, alpha=0.1, seed=42, 147 inputs, 52-draw warmup; no test-based parameter selection.",
+  "limitation": "All eight networks reached the 150-iteration limit without convergence. Historical comparison is exploratory, not untouched prospective validation.",
+  "tests_passed": 85,
+  "games": {
+    "1": {
+      "first_run": {
+        "source_sha256": "631ecac60a8884a96a5331675972edc336f07e826c72eea207f66edc8442d5d6",
+        "game": 1,
+        "version": "theta-mobius-v2",
+        "note": "Exploratory; no confirmed predictive edge or profit estimate",
+        "comparison": "Same feature dimensions, target dates and model configuration",
+        "cache_behavior": "Reuse identical training; changed data/config retrains, without incremental resume",
+        "model_configuration": {
+          "hidden_layer_sizes": [
+            32
+          ],
+          "alpha": 0.1,
+          "early_stopping": false,
+          "max_iter": 150,
+          "random_state": 42,
+          "solver": "adam",
+          "shuffle": true,
+          "learning_rate_init": 0.001
+        },
+        "libraries": {
+          "numpy": "2.3.5",
+          "scikit-learn": "1.8.0",
+          "joblib": "1.5.3"
+        },
+        "source_rows": 3821,
+        "warmup_rows": 52,
+        "feature_count": 147,
+        "split_samples": {
+          "training": 2638,
+          "validation": 565,
+          "test": 566
+        },
+        "validation_dates": [
+          "2019-04-14",
+          "2023-03-12"
+        ],
+        "test_dates": [
+          "2023-03-15",
+          "2026-10-21"
+        ],
+        "models": {
+          "raw": {
+            "validation": {
+              "bce": 0.37907205016072537,
+              "brier": 0.10900132358074188,
+              "recall_at_6": 0.13067846607669617,
+              "recall_at_10": 0.207669616519174,
+              "kl_vs_uniform": 0.05594077779889882,
+              "avg_hits_6": 0.784070796460177,
+              "avg_hits_10": 1.2460176991150442,
+              "ticket_3plus_rate": 0.02654867256637168,
+              "ticket_4plus_rate": 0.0017699115044247787,
+              "ticket_5plus_rate": 0.0,
+              "ticket_6_rate": 0.0,
+              "n": 565
+            },
+            "test": {
+              "bce": 0.3780550877625266,
+              "brier": 0.10884608328342438,
+              "recall_at_6": 0.12014134275618374,
+              "recall_at_10": 0.2143698468786808,
+              "kl_vs_uniform": 0.0553706602217092,
+              "avg_hits_6": 0.7208480565371025,
+              "avg_hits_10": 1.2862190812720848,
+              "ticket_3plus_rate": 0.022968197879858657,
+              "ticket_4plus_rate": 0.0017667844522968198,
+              "ticket_5plus_rate": 0.0,
+              "ticket_6_rate": 0.0,
+              "n": 566
+            },
+            "cache_reused": false,
+            "checkpoint_key": "8396ada29c0a6217397455c0",
+            "training_iterations": 150,
+            "reached_iteration_limit": true,
+            "final_training_loss": 17.689649500743386
+          },
+          "theta": {
+            "validation": {
+              "bce": 0.38551757023192307,
+              "brier": 0.11054493486881256,
+              "recall_at_6": 0.12212389380530973,
+              "recall_at_10": 0.19734513274336282,
+              "kl_vs_uniform": 0.0963875761559771,
+              "avg_hits_6": 0.7327433628318584,
+              "avg_hits_10": 1.184070796460177,
+              "ticket_3plus_rate": 0.01592920353982301,
+              "ticket_4plus_rate": 0.0017699115044247787,
+              "ticket_5plus_rate": 0.0,
+              "ticket_6_rate": 0.0,
+              "n": 565
+            },
+            "test": {
+              "bce": 0.382609766520631,
+              "brier": 0.10979355871677399,
+              "recall_at_6": 0.13250883392226148,
+              "recall_at_10": 0.21319199057714958,
+              "kl_vs_uniform": 0.09097135050768253,
+              "avg_hits_6": 0.7950530035335689,
+              "avg_hits_10": 1.2791519434628975,
+              "ticket_3plus_rate": 0.030035335689045935,
+              "ticket_4plus_rate": 0.0035335689045936395,
+              "ticket_5plus_rate": 0.0,
+              "ticket_6_rate": 0.0,
+              "n": 566
+            },
+            "cache_reused": false,
+            "checkpoint_key": "8efeaee6e2d69001c7adc0e6",
+            "training_iterations": 150,
+            "reached_iteration_limit": true,
+            "final_training_loss": 17.440713200760506
+          },
+          "mobius": {
+            "validation": {
+              "bce": 0.3789391533529876,
+              "brier": 0.10900760442018509,
+              "recall_at_6": 0.12654867256637167,
+              "recall_at_10": 0.2103244837758112,
+              "kl_vs_uniform": 0.053974522300626375,
+              "avg_hits_6": 0.7592920353982301,
+              "avg_hits_10": 1.2619469026548673,
+              "ticket_3plus_rate": 0.023008849557522124,
+              "ticket_4plus_rate": 0.0035398230088495575,
+              "ticket_5plus_rate": 0.0,
+              "ticket_6_rate": 0.0,
+              "n": 565
+            },
+            "test": {
+              "bce": 0.37807444391925243,
+              "brier": 0.10879941284656525,
+              "recall_at_6": 0.12897526501766785,
+              "recall_at_10": 0.21319199057714958,
+              "kl_vs_uniform": 0.051102832006182514,
+              "avg_hits_6": 0.773851590106007,
+              "avg_hits_10": 1.2791519434628975,
+              "ticket_3plus_rate": 0.03180212014134275,
+              "ticket_4plus_rate": 0.00530035335689046,
+              "ticket_5plus_rate": 0.0,
+              "ticket_6_rate": 0.0,
+              "n": 566
+            },
+            "cache_reused": false,
+            "checkpoint_key": "c7ba65ded8bf91f8785bef93",
+            "training_iterations": 150,
+            "reached_iteration_limit": true,
+            "final_training_loss": 17.72046023095194
+          },
+          "mertens": {
+            "validation": {
+              "bce": 0.3810787242748974,
+              "brier": 0.10948468744754791,
+              "recall_at_6": 0.12772861356932153,
+              "recall_at_10": 0.2144542772861357,
+              "kl_vs_uniform": 0.07192623862277363,
+              "avg_hits_6": 0.7663716814159292,
+              "avg_hits_10": 1.286725663716814,
+              "ticket_3plus_rate": 0.021238938053097345,
+              "ticket_4plus_rate": 0.0035398230088495575,
+              "ticket_5plus_rate": 0.0,
+              "ticket_6_rate": 0.0,
+              "n": 565
+            },
+            "test": {
+              "bce": 0.37958947506108814,
+              "brier": 0.10914953798055649,
+              "recall_at_6": 0.12485276796230861,
+              "recall_at_10": 0.21201413427561838,
+              "kl_vs_uniform": 0.0681486925006009,
+              "avg_hits_6": 0.7491166077738516,
+              "avg_hits_10": 1.2720848056537102,
+              "ticket_3plus_rate": 0.024734982332155476,
+              "ticket_4plus_rate": 0.0035335689045936395,
+              "ticket_5plus_rate": 0.0,
+              "ticket_6_rate": 0.0,
+              "n": 566
+            },
+            "cache_reused": false,
+            "checkpoint_key": "90c9638f872a4c7eeaff0fb3",
+            "training_iterations": 150,
+            "reached_iteration_limit": true,
+            "final_training_loss": 17.566803481087
+          },
+          "uniform": {
+            "validation": {
+              "bce": 0.3717761799434528,
+              "brier": 0.10745521634817123,
+              "recall_at_6": 0.1168141592920354,
+              "recall_at_10": 0.19498525073746312,
+              "kl_vs_uniform": 0.0,
+              "avg_hits_6": 0.7008849557522124,
+              "avg_hits_10": 1.1699115044247788,
+              "ticket_3plus_rate": 0.01592920353982301,
+              "ticket_4plus_rate": 0.0,
+              "ticket_5plus_rate": 0.0,
+              "ticket_6_rate": 0.0,
+              "n": 565
+            },
+            "test": {
+              "bce": 0.3717761799434528,
+              "brier": 0.10745522379875183,
+              "recall_at_6": 0.12750294464075382,
+              "recall_at_10": 0.21083627797408716,
+              "kl_vs_uniform": 0.0,
+              "avg_hits_6": 0.765017667844523,
+              "avg_hits_10": 1.265017667844523,
+              "ticket_3plus_rate": 0.012367491166077738,
+              "ticket_4plus_rate": 0.0,
+              "ticket_5plus_rate": 0.0,
+              "ticket_6_rate": 0.0,
+              "n": 566
+            }
+          }
+        },
+        "interpretation": "Point estimates only. Comparing several feature variants on one test period does not demonstrate significance or justify choosing a betting model. Replicate a prespecified choice on untouched future draws."
+      },
+      "identical_cached_metrics_verified": true,
+      "cached_models_reused": [
+        "raw",
+        "theta",
+        "mobius",
+        "mertens"
+      ]
+    },
+    "2": {
+      "first_run": {
+        "source_sha256": "631ecac60a8884a96a5331675972edc336f07e826c72eea207f66edc8442d5d6",
+        "game": 2,
+        "version": "theta-mobius-v2",
+        "note": "Exploratory; no confirmed predictive edge or profit estimate",
+        "comparison": "Same feature dimensions, target dates and model configuration",
+        "cache_behavior": "Reuse identical training; changed data/config retrains, without incremental resume",
+        "model_configuration": {
+          "hidden_layer_sizes": [
+            32
+          ],
+          "alpha": 0.1,
+          "early_stopping": false,
+          "max_iter": 150,
+          "random_state": 42,
+          "solver": "adam",
+          "shuffle": true,
+          "learning_rate_init": 0.001
+        },
+        "libraries": {
+          "numpy": "2.3.5",
+          "scikit-learn": "1.8.0",
+          "joblib": "1.5.3"
+        },
+        "source_rows": 3821,
+        "warmup_rows": 52,
+        "feature_count": 147,
+        "split_samples": {
+          "training": 2638,
+          "validation": 565,
+          "test": 566
+        },
+        "validation_dates": [
+          "2019-04-14",
+          "2023-03-12"
+        ],
+        "test_dates": [
+          "2023-03-15",
+          "2026-10-21"
+        ],
+        "models": {
+          "raw": {
+            "validation": {
+              "bce": 0.37965462178579135,
+              "brier": 0.10911766439676285,
+              "recall_at_6": 0.11799410029498524,
+              "recall_at_10": 0.20117994100294984,
+              "kl_vs_uniform": 0.056277103823792606,
+              "avg_hits_6": 0.7079646017699115,
+              "avg_hits_10": 1.2070796460176991,
+              "ticket_3plus_rate": 0.01415929203539823,
+              "ticket_4plus_rate": 0.0017699115044247787,
+              "ticket_5plus_rate": 0.0017699115044247787,
+              "ticket_6_rate": 0.0,
+              "n": 565
+            },
+            "test": {
+              "bce": 0.37972397309839123,
+              "brier": 0.10926587134599686,
+              "recall_at_6": 0.12367491166077739,
+              "recall_at_10": 0.2064193168433451,
+              "kl_vs_uniform": 0.05787882473875569,
+              "avg_hits_6": 0.7420494699646644,
+              "avg_hits_10": 1.2385159010600706,
+              "ticket_3plus_rate": 0.012367491166077738,
+              "ticket_4plus_rate": 0.0,
+              "ticket_5plus_rate": 0.0,
+              "ticket_6_rate": 0.0,
+              "n": 566
+            },
+            "cache_reused": false,
+            "checkpoint_key": "dc223b435249e814b0276846",
+            "training_iterations": 150,
+            "reached_iteration_limit": true,
+            "final_training_loss": 17.68318009586221
+          },
+          "theta": {
+            "validation": {
+              "bce": 0.38571881423369136,
+              "brier": 0.11059948056936264,
+              "recall_at_6": 0.12477876106194688,
+              "recall_at_10": 0.20648967551622416,
+              "kl_vs_uniform": 0.09613340217018203,
+              "avg_hits_6": 0.7486725663716814,
+              "avg_hits_10": 1.238938053097345,
+              "ticket_3plus_rate": 0.024778761061946902,
+              "ticket_4plus_rate": 0.0035398230088495575,
+              "ticket_5plus_rate": 0.0,
+              "ticket_6_rate": 0.0,
+              "n": 565
+            },
+            "test": {
+              "bce": 0.38485930115489897,
+              "brier": 0.11046452075242996,
+              "recall_at_6": 0.12014134275618374,
+              "recall_at_10": 0.19964664310954064,
+              "kl_vs_uniform": 0.09239581831660419,
+              "avg_hits_6": 0.7208480565371025,
+              "avg_hits_10": 1.197879858657244,
+              "ticket_3plus_rate": 0.014134275618374558,
+              "ticket_4plus_rate": 0.0017667844522968198,
+              "ticket_5plus_rate": 0.0,
+              "ticket_6_rate": 0.0,
+              "n": 566
+            },
+            "cache_reused": false,
+            "checkpoint_key": "68a334c15f34c1bca2815c22",
+            "training_iterations": 150,
+            "reached_iteration_limit": true,
+            "final_training_loss": 17.459606026676212
+          },
+          "mobius": {
+            "validation": {
+              "bce": 0.38050766058402585,
+              "brier": 0.10930424183607101,
+              "recall_at_6": 0.12212389380530973,
+              "recall_at_10": 0.20353982300884957,
+              "kl_vs_uniform": 0.05550804452256959,
+              "avg_hits_6": 0.7327433628318584,
+              "avg_hits_10": 1.2212389380530972,
+              "ticket_3plus_rate": 0.024778761061946902,
+              "ticket_4plus_rate": 0.0035398230088495575,
+              "ticket_5plus_rate": 0.0,
+              "ticket_6_rate": 0.0,
+              "n": 565
+            },
+            "test": {
+              "bce": 0.3795985982848224,
+              "brier": 0.10917473584413528,
+              "recall_at_6": 0.1163133097762073,
+              "recall_at_10": 0.196113074204947,
+              "kl_vs_uniform": 0.05405858525516541,
+              "avg_hits_6": 0.6978798586572438,
+              "avg_hits_10": 1.176678445229682,
+              "ticket_3plus_rate": 0.0088339222614841,
+              "ticket_4plus_rate": 0.0,
+              "ticket_5plus_rate": 0.0,
+              "ticket_6_rate": 0.0,
+              "n": 566
+            },
+            "cache_reused": false,
+            "checkpoint_key": "d57a539e4ad097a2e19a13d6",
+            "training_iterations": 150,
+            "reached_iteration_limit": true,
+            "final_training_loss": 17.72380346857243
+          },
+          "mertens": {
+            "validation": {
+              "bce": 0.38327801282781576,
+              "brier": 0.10992918908596039,
+              "recall_at_6": 0.12772861356932153,
+              "recall_at_10": 0.20206489675516226,
+              "kl_vs_uniform": 0.07415812472772118,
+              "avg_hits_6": 0.7663716814159292,
+              "avg_hits_10": 1.2123893805309736,
+              "ticket_3plus_rate": 0.024778761061946902,
+              "ticket_4plus_rate": 0.0017699115044247787,
+              "ticket_5plus_rate": 0.0,
+              "ticket_6_rate": 0.0,
+              "n": 565
+            },
+            "test": {
+              "bce": 0.3815117847616814,
+              "brier": 0.1096373125910759,
+              "recall_at_6": 0.12220259128386335,
+              "recall_at_10": 0.20583038869257947,
+              "kl_vs_uniform": 0.07306218433916423,
+              "avg_hits_6": 0.7332155477031802,
+              "avg_hits_10": 1.234982332155477,
+              "ticket_3plus_rate": 0.0176678445229682,
+              "ticket_4plus_rate": 0.0,
+              "ticket_5plus_rate": 0.0,
+              "ticket_6_rate": 0.0,
+              "n": 566
+            },
+            "cache_reused": false,
+            "checkpoint_key": "dfa102a9e1018e432bf57342",
+            "training_iterations": 150,
+            "reached_iteration_limit": true,
+            "final_training_loss": 17.573635245852355
+          },
+          "uniform": {
+            "validation": {
+              "bce": 0.3717761799434528,
+              "brier": 0.10745521634817123,
+              "recall_at_6": 0.12359882005899704,
+              "recall_at_10": 0.21120943952802357,
+              "kl_vs_uniform": 0.0,
+              "avg_hits_6": 0.7415929203539823,
+              "avg_hits_10": 1.2672566371681415,
+              "ticket_3plus_rate": 0.017699115044247787,
+              "ticket_4plus_rate": 0.0017699115044247787,
+              "ticket_5plus_rate": 0.0,
+              "ticket_6_rate": 0.0,
+              "n": 565
+            },
+            "test": {
+              "bce": 0.3717761799434528,
+              "brier": 0.10745522379875183,
+              "recall_at_6": 0.12573616018845699,
+              "recall_at_10": 0.20759717314487633,
+              "kl_vs_uniform": 0.0,
+              "avg_hits_6": 0.7544169611307421,
+              "avg_hits_10": 1.245583038869258,
+              "ticket_3plus_rate": 0.022968197879858657,
+              "ticket_4plus_rate": 0.0,
+              "ticket_5plus_rate": 0.0,
+              "ticket_6_rate": 0.0,
+              "n": 566
+            }
+          }
+        },
+        "interpretation": "Point estimates only. Comparing several feature variants on one test period does not demonstrate significance or justify choosing a betting model. Replicate a prespecified choice on untouched future draws."
+      },
+      "identical_cached_metrics_verified": true,
+      "cached_models_reused": [
+        "raw",
+        "theta",
+        "mobius",
+        "mertens"
+      ]
+    }
+  }
+}

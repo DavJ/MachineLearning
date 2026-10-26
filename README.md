@@ -65,6 +65,8 @@ tickets, connects to a gambling account, or increases a budget automatically.
 - [Technical notes](sportka/README.md): rules, causal evaluation and limitations
 - [Exact six-set scoring](docs/sportka_exact_six.md): normalized set likelihoods for existing model outputs
 - [Repair summary](IMPLEMENTATION_SUMMARY.md): bugs fixed and verification scope
+- [Neural theta/Möbius/Mertens check](reports/sportka_theta_mobius_2026-10-23.md): comparable variants and saved checkpoints
+- [Neural signal recovery](docs/sportka_neural_recovery.md): the same fitted models tested against known artificial mechanisms
 - [Real-data baseline check](reports/sportka_baseline_2026-10-22.md): both draws, 3,821 dates
 - [Historical reports](reports/README.md): archived experiments requiring reruns
 

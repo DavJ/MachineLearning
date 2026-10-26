@@ -81,3 +81,17 @@ Biquaternion encodings and theta rotations are feature transforms, not evidence
 of a forecasting advantage. An orthogonal rotation preserves Euclidean geometry;
 it does not in general decorrelate arbitrary data. Tests of feature correctness
 and software execution do not establish profitable lottery prediction.
+
+## Comparable spectral experiment and checkpoints
+
+`python -m sportka.experiments.theta_mobius` compares a fixed 32-unit MLP on raw
+history, theta-like cosine features, Möbius coefficients, and Mertens partial sums.
+Every variant gets 147 dimensions and identical targets. Its one-draw binary
+channel stays untransformed, since cos(2*pi*n*x) maps integer x=0 and x=1 to the
+same value. Only the 16/52-draw frequency channels differ between variants.
+
+A joblib checkpoint is reused only when source, feature/model configuration,
+training values, and dependency versions match. Saving uses temporary files and
+atomic replacement; a failed save preserves the previous checkpoint. This is
+same-data reuse, not incremental training on a new history. Validation/test
+metrics are reported separately and no model is promoted for betting.
