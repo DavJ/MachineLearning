@@ -133,6 +133,24 @@ def test_training_signature_includes_shape_and_values(training_arrays):
     assert training_signature(x, y) != training_signature(x.reshape(5, 20), y)
 
 
+def test_truncated_checkpoint_requires_explicit_rebuild(training_arrays, tmp_path):
+    from sklearn.exceptions import ConvergenceWarning
+    x, y = training_arrays
+    options = dict(key="truncated", cache_dir=tmp_path, kind="raw", hidden=4, max_iter=2)
+    path = tmp_path / "raw-truncated.joblib"
+    path.write_bytes(b"\x80\x04")
+    before = path.read_bytes()
+    with pytest.raises(ValueError, match="Unreadable checkpoint.*--fresh"):
+        train_or_load(x, y, **options)
+    assert path.read_bytes() == before
+    with pytest.warns(ConvergenceWarning):
+        model, reused = train_or_load(x, y, fresh=True, **options)
+    assert not reused and path.read_bytes() != before
+    restored, reused = train_or_load(x, y, **options)
+    assert reused
+    np.testing.assert_array_equal(restored.predict_proba(x), model.predict_proba(x))
+
+
 def test_run_fits_training_only_and_reuses_all_four_checkpoints(tmp_path, monkeypatch):
     from sklearn.exceptions import ConvergenceWarning
     from sklearn.neural_network import MLPClassifier

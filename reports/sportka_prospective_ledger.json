@@ -1,0 +1,102 @@
+{
+  "protocol": {
+    "version": "sportka-prospective-v1",
+    "models": [
+      "frequency_all",
+      "frequency_52",
+      "previous_draw"
+    ],
+    "games": [
+      "1",
+      "2"
+    ],
+    "tilts": [
+      0.01,
+      0.025,
+      0.05,
+      0.1,
+      0.25,
+      0.5,
+      1.0
+    ],
+    "pool_size": 49,
+    "main_count": 6,
+    "alpha": 0.05,
+    "combination": "equal mixture of 42 persistent game/model/tilt processes",
+    "selection": "descending count; ties by ascending number; no tuning",
+    "timezone": "Europe/Prague",
+    "minimum_history": 52
+  },
+  "events": [
+    {
+      "type": "forecast",
+      "at_utc": "2026-10-23T20:13:17.114604+00:00",
+      "target_date": "2026-10-25",
+      "source": {
+        "count": 3822,
+        "through": "2026-10-23",
+        "csv_sha256": "ff89e477192390abfb0ae81892ae824c1eaeefa6e86dc90204949863358f2cbd",
+        "prefix_sha256": "0dfc35cbdc68989eb354a166de919ec588bfb588ed41b86eefb268920e49b7e0"
+      },
+      "predictor_code_sha256": "5144aaafb0937bfc07fdce9e737a99263fd610fcb85c186731841520c7ecd8a5",
+      "predictions": {
+        "frequency_all": {
+          "1": [
+            6,
+            18,
+            20,
+            29,
+            30,
+            47
+          ],
+          "2": [
+            12,
+            13,
+            23,
+            36,
+            40,
+            44
+          ]
+        },
+        "frequency_52": {
+          "1": [
+            9,
+            11,
+            13,
+            27,
+            29,
+            42
+          ],
+          "2": [
+            1,
+            5,
+            20,
+            22,
+            40,
+            42
+          ]
+        },
+        "previous_draw": {
+          "1": [
+            17,
+            21,
+            30,
+            38,
+            41,
+            43
+          ],
+          "2": [
+            3,
+            11,
+            15,
+            30,
+            41,
+            47
+          ]
+        }
+      },
+      "previous": "8949e34307ac763424bfe5be6108c6113a828171c29eef3c09a2db666ecea99e",
+      "hash": "912cddc298f8021c948cc569b1d01e2b9a427c71d5f5430e90700996478b6a09"
+    }
+  ]
+}

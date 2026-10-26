@@ -17,6 +17,7 @@ NOTICE = ("Fair independent draws cannot be predicted from past results. "
 def backtest(args):
     """Evaluate fixed baselines on untouched chronological validation/test sets."""
     from sportka.evaluation import compute_all_metrics, temporal_feature_split
+    from sportka.fixed_cardinality import PROBABILITY_CLIP, VERSION
     from sportka.features import generate_synthetic_data, load_sportka_csv
     from sportka.models import GlobalFreqPredictor, RandomPredictor, RollingFreqPredictor
 
@@ -56,6 +57,14 @@ def backtest(args):
         "expected_random_hits_per_line": 36 / 49,
         "expected_random_jackpot_rate": 1 / TOTAL_COMBINATIONS,
         "selection": "Fixed models; no test-set tuning or automatic betting recommendation",
+        "conditional_score_protocol": {
+            "version": VERSION,
+            "law": "Independent Bernoulli scores conditioned on exactly six main balls",
+            "probability_clip": PROBABILITY_CLIP,
+            "set_score_units": "Natural log units per complete draw; lower NLL is better",
+            "gain": "Uniform set NLL minus model set NLL; positive is descriptive, not evidence of an edge",
+            "marginals": "conditional_bce/brier use implied marginals; bce/brier retain raw scores",
+        },
         "tie_policy": "Equal probability scores use a fixed numerical ordering for top-k metrics",
         "profit": "Not estimated: actual payouts, costs, and jackpot sharing are not supplied",
         "results": results,

@@ -10,6 +10,7 @@ import hashlib
 from importlib.metadata import version
 import json
 import os
+import pickle
 from pathlib import Path
 import tempfile
 
@@ -136,7 +137,10 @@ def train_or_load(X, Y, *, key, cache_dir, kind, hidden=32, max_iter=150,
     directory.mkdir(parents=True, exist_ok=True)
     path = directory / f"{kind}-{key}.joblib"
     if path.exists() and not fresh:
-        record = load(path)
+        try:
+            record = load(path)
+        except (EOFError, ValueError, OSError, pickle.UnpicklingError) as exc:
+            raise ValueError("Unreadable checkpoint; rerun with --fresh to rebuild it") from exc
         expected = {"key": key, "train_signature": signature, "kind": kind,
                     "configuration": configuration, "libraries": libraries,
                     "version": VERS}
@@ -151,6 +155,8 @@ def train_or_load(X, Y, *, key, cache_dir, kind, hidden=32, max_iter=150,
         dump({"model": model, "key": key, "train_signature": signature,
               "train_rows": len(Y), "version": VERS, "kind": kind,
               "configuration": configuration, "libraries": libraries}, tmp)
+        with tmp.open("rb") as handle:
+            os.fsync(handle.fileno())
         os.replace(tmp, path)
     finally:
         tmp.unlink(missing_ok=True)

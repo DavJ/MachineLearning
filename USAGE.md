@@ -100,6 +100,14 @@ selected six-number column. Equal scores use a fixed numerical tie ordering.
 Prize amounts and profit are not estimated. A 5+ main-hit rate does not
 distinguish the separate 5+bonus tier.
 
+The same report includes `conditional_set_nll` and
+`conditional_set_gain_vs_uniform`: log scores for the complete observed six-set
+after conditioning independent model outputs on six balls. Conditional marginal
+BCE/Brier use the resulting inclusion probabilities; raw BCE/Brier are retained.
+The JSON names the fixed clipping rule and score version. See
+[the method and limits](docs/sportka_exact_six.md). Positive historical gain is
+descriptive and has no significance or profitability guarantee.
+
 Use synthetic data explicitly for diagnostics:
 
 ```bash
@@ -164,3 +172,15 @@ checkpoint identity. Changed history is retrained for the fixed chronological
 protocol; cached models do not incrementally resume optimization on new data.
 Choosing a winning variant from these test scores would be retrospective model
 selection. A forecasting claim needs a prespecified future evaluation.
+
+To measure recovery of known artificial signals with this same frozen neural
+configuration and validation-only selection:
+
+```bash
+OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 python -m sportka.experiments.neural_recovery \
+  --csv data/sportka.csv --trials 16 --workers 2
+```
+
+The [method](docs/sportka_neural_recovery.md) records weak/strong number, pair and
+temporal controls, whole-set likelihoods, saved models and limits. Historical
+results remain exploratory, and the registered prospective protocol is unchanged.

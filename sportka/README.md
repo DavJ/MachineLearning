@@ -23,6 +23,7 @@ draw, every valid six-number column has the same jackpot probability.
 | `cli.py` | Offline tickets, odds, limits and reproducible baseline backtests |
 | `features.py` | Base, time, rolling, exponential, torus and theta feature families |
 | `evaluation.py` | Causal temporal splits, proper scores, hit rates and controls |
+| `fixed_cardinality.py` | Exact conditional Bernoulli six-set likelihoods and implied inclusion marginals |
 | `models.py`, `model.py` | Frequency baselines and experimental sklearn models |
 | `neural_network.py` | Optional TensorFlow first-draw model and metadata-aware weights |
 | `gui.py` | Optional Tkinter workflow with six-number output |
@@ -49,6 +50,12 @@ scores are not constrained to sum to six and must not be labelled calibrated
 probabilities without additional validation. The probability assertion checks
 finite values, bounds and every row's total rather than an average over rows.
 BCE clips in float64 so exact zero/one float32 predictions remain finite.
+
+The shared evaluator also [conditions independent scores on exactly six
+balls](../docs/sportka_exact_six.md), with a fixed 1e-9 boundary clip. It reports
+complete-set NLL/gain and the resulting marginal BCE/Brier separately from raw
+scores. This specifies a normalized model; it does not establish empirical
+calibration or infer arbitrary ball interactions from marginal probabilities.
 
 ## Testing and interpretation
 
